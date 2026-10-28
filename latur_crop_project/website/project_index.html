@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latur Crop Recommendation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+            --accent: #f1c40f;
+            --light: #ecf0f1;
+            --dark: #1a1a2e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark);
+            color: #ecf0f1;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: var(--primary);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .navbar .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .navbar .title {
+            color: white;
+            margin-left: 2rem;
+            font-size: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 0 2rem;
+        }
+
+        .header-text {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header-text h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #e74c3c, #f1c40f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .header-text p {
+            color: #bdc3c7;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--primary);
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #e74c3c, #f1c40f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #bdc3c7;
+            font-size: 1rem;
+        }
+
+        .section {
+            background: var(--primary);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            color: white;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .list-item {
+            background: var(--secondary);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: var(--dark);
+            margin-top: 3rem;
+        }
+
+        .highlight {
+            background: var(--accent);
+            color: var(--dark);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a class="logo" href="#">Crop Rec System</a>
+        <div class="title">Latur District Crop Recommendation</a>
+    </nav>
+
+    <div class="container">
+        <div class="header-text">
+            <h1>Latur Crop Recommendation System</h1>
+            <p>15-Year Weather Analysis & Multi-Factor Scoring for Maharashtra Agriculture</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">304</div>
+                <div class="stat-label">Tehsils with Weather Data</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">19,548</div>
+                <div class="stat-label">Crop Suitability Scores</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">33</div>
+                <div class="stat-label">Districts Covered</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">54</div>
+                <div class="stat-label">Crop Varieties</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Key Results</h2>
+            <div class="list-item">
+                <strong>Latur/Ahmadpur:</strong> Soybean rank 1 (score 95), Rice suppressed (rank 23, score 78)
+            </div>
+            <div class="list-item">
+                <strong>Konkan/ Raigad:</strong> Cashew top (87), Mango (81), Rice below 60 threshold
+            </div>
+            <div class="list-item">
+                <strong>Bhandara/Gondia:</strong> Rice rank 1 with 15-yr weather (irrigation 26-37%)
+            </div>
+            <div class="list-item">
+                <strong>Frontend Data:</strong> 11,076 crop lists with irrigation/growing/history factors
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Project Overview</h2>
+            <p>The Latur Crop Recommendation System uses 15-year historical weather data (2010-2025) from Open-Meteo, ICRISAT district irrigation data, and a multi-factor scoring formula (F = [0.25R + 0.20T + 0.25So + 0.10W + 0.10G + 0.05H + 0.05M] × L) to recommend optimal crops for any tehsil in Maharashtra.</p>
+            <p>The system is designed to prevent rice over-ranking in water-scarce regions and prioritize water-efficient crops where appropriate.</p>
+        </div>
+
+        <div class="footer">
+            <p>Data as of September 2026 | Generated by Latur Crop Recommendation System</p>
+        </div>
+    </div>
+
+</body>
+</html>
