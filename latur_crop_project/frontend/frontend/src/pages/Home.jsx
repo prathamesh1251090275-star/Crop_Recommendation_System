@@ -2,11 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFarm } from '../context/FarmContext';
 import Header from '../components/Header';
-import { MapPin, Building2, ChevronRight, Sprout, Search, BookOpen } from 'lucide-react';
+import { MapPin, Building2, ChevronRight, Sprout, Search, BookOpen, FlaskConical } from 'lucide-react';
 
 export default function Home() {
   const navigate = useNavigate();
-  const { t, districtName, tehsilName, setLocationModalOpen } = useFarm();
+  const { lang, t, districtName, tehsilName, setLocationModalOpen, recommendationMode, soilLabData } = useFarm();
+
+  const isLabActive = recommendationMode === 'soil_lab' && !!soilLabData;
 
   return (
     <div className="mobile-screen home-screen">
@@ -58,7 +60,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 3 Main Action Cards */}
+        {/* Action Cards Grid */}
         <section className="main-actions-section">
           {/* 1. Green Button: Find Crop For Me */}
           <button
@@ -75,7 +77,34 @@ export default function Home() {
             </div>
           </button>
 
-          {/* 2. Blue Button: Check My Crop */}
+          {/* 2. Teal Button: Smart Soil Lab (Optional Feature) */}
+          <button
+            type="button"
+            className="action-big-card"
+            style={{
+              background: '#FFFFFF',
+              border: isLabActive ? '2px solid #00695C' : '1px solid #80CBC4',
+              boxShadow: '0 3px 10px rgba(0, 105, 92, 0.08)'
+            }}
+            onClick={() => navigate('/soil-lab')}
+          >
+            <div className="action-icon-circle" style={{ background: '#E0F2F1' }}>
+              <FlaskConical size={28} color="#00695C" />
+            </div>
+            <div className="action-card-text">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <h3 className="action-card-title" style={{ color: '#004D40' }}>{t('soilLabTitle')}</h3>
+                <span style={{ fontSize: '0.65rem', background: '#E0F2F1', color: '#00695C', padding: '0.1rem 0.35rem', borderRadius: '4px', fontWeight: 700 }}>
+                  {isLabActive ? 'सक्रिय' : t('optionalBadge')}
+                </span>
+              </div>
+              <p className="action-card-desc" style={{ color: '#00695C' }}>
+                {lang === 'mr' ? 'प्रयोगशाळा माती अहवाल (pH, NPK, EC) व अचूक पिके' : 'Lab soil report (pH, NPK, EC) precision match'}
+              </p>
+            </div>
+          </button>
+
+          {/* 3. Blue Button: Check My Crop */}
           <button
             type="button"
             className="action-big-card card-blue"
@@ -90,7 +119,7 @@ export default function Home() {
             </div>
           </button>
 
-          {/* 3. Purple Button: View Crop Facts */}
+          {/* 4. Purple Button: View Crop Facts */}
           <button
             type="button"
             className="action-big-card card-purple"
@@ -106,7 +135,6 @@ export default function Home() {
           </button>
         </section>
       </main>
-
-      </div>
+    </div>
   );
 }

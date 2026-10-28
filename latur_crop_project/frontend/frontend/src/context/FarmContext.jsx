@@ -4,6 +4,7 @@ import { CROPS_DATA } from '../data/cropsData';
 import { DISTRICTS, TEHSILS_BY_DISTRICT } from '../data/locations';
 import { REGIONAL_SCORES } from '../data/regionalScores';
 import { MANDI_PRICES } from '../data/mandiPrices';
+import { computeCropSoilLabScore, analyzeSoilHealthGap, validateSoilLabInputs } from '../data/soilLabEngine';
 
 const FarmContext = createContext();
 
@@ -261,6 +262,23 @@ export function FarmProvider({ children }) {
   const [soilType, setSoilType] = useState(() => localStorage.getItem('pm_soilType') || 'black');
   const [waterSource, setWaterSource] = useState(() => localStorage.getItem('pm_waterSource') || 'limited');
   const [season, setSeason] = useState(() => localStorage.getItem('pm_season') || 'all');
+  // Smart Soil Lab States (Default: Standard mode)
+  const [recommendationMode, setRecommendationMode] = useState(() => localStorage.getItem('pm_rec_mode') || 'standard');
+  const [soilLabData, setSoilLabData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pm_soil_lab_profile');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [savedSoilProfiles, setSavedSoilProfiles] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('pm_saved_soil_profiles')) || [];
+    } catch {
+      return [];
+    }
+  });
 
   const [bookmarks, setBookmarks] = useState(() => {
     try {
@@ -295,6 +313,14 @@ export function FarmProvider({ children }) {
   useEffect(() => { localStorage.setItem('pm_soilType', soilType); }, [soilType]);
   useEffect(() => { localStorage.setItem('pm_waterSource', waterSource); }, [waterSource]);
   useEffect(() => { localStorage.setItem('pm_season', season); }, [season]);
+  useEffect(() => { localStorage.setItem('pm_rec_mode', recommendationMode); }, [recommendationMode]);
+  useEffect(() => {
+    if (soilLabData) localStorage.setItem('pm_soil_lab_profile', JSON.stringify(soilLabData));
+    else localStorage.removeItem('pm_soil_lab_profile');
+  }, [soilLabData]);
+  useEffect(() => {
+    localStorage.setItem('pm_saved_soil_profiles', JSON.stringify(savedSoilProfiles));
+  }, [savedSoilProfiles]);
   useEffect(() => { localStorage.setItem('pm_bookmarks', JSON.stringify(bookmarks)); }, [bookmarks]);
   useEffect(() => { localStorage.setItem('pm_history', JSON.stringify(history)); }, [history]);
 
@@ -315,6 +341,31 @@ export function FarmProvider({ children }) {
     if (landUnit === 'hectare') return val * 2.471;
     return val;
   }, [landArea, landUnit]);
+
+  // Soil Health Gap Analysis memo
+  const soilHealthGap = useMemo(() => {
+    if (recommendationMode === 'soil_lab' && soilLabData) {
+      return analyzeSoilHealthGap(soilLabData);
+    }
+    return null;
+  }, [recommendationMode, soilLabData]);
+
+  const saveSoilLabProfile = (profile) => {
+    if (!profile) return;
+    const newEntry = {
+      ...profile,
+      id: Date.now().toString(),
+      date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    };
+    setSavedSoilProfiles(prev => [newEntry, ...prev.filter(p => p.id !== newEntry.id)].slice(0, 10));
+    setSoilLabData(profile);
+  };
+
+  const clearSoilLabData = () => {
+    setSoilLabData(null);
+    setRecommendationMode('standard');
+    localStorage.removeItem('pm_soil_lab_profile');
+  };
 
   // Helper to determine factor statuses dynamically
   const getStatusText = (val, type = 'general') => {
@@ -349,6 +400,9 @@ export function FarmProvider({ children }) {
 
     const computed = CROPS_DATA.map((crop) => {
       const reg = scoreMap.get(crop.id);
+      // Optional Smart Soil Lab Evaluation
+      const isLabMode = recommendationMode === 'soil_lab' && !!soilLabData;
+      const cropSoilLab = isLabMode ? computeCropSoilLabScore(crop.id, soilLabData) : null;
       const agronomy = CROP_AGRONOMY_MATRIX[crop.id] || {
         category: crop.category || 'cashcrops',
         season: 'kharif',
@@ -377,9 +431,18 @@ export function FarmProvider({ children }) {
         baseScore = Math.min(baseScore, 45);
       }
 
-      // 2. Soil Type Suitability Adjustment
+      // 2. Soil Type Suitability Adjustment (or Soil Lab Precision Adjustment)
       const soilAdj = agronomy.soil?.[soilType] !== undefined ? agronomy.soil[soilType] : 0;
       let finalScore = baseScore + soilAdj;
+
+      if (isLabMode && cropSoilLab) {
+        // Refine score based on actual laboratory test
+        const labDelta = Math.round((cropSoilLab.soilLabScore - 75) * 0.35);
+        finalScore += labDelta;
+        if (cropSoilLab.severeConflict) {
+          finalScore = Math.min(finalScore, 45);
+        }
+      }
 
       // 3. Water Availability Adjustment
       let waterConflict = false;
@@ -448,8 +511,11 @@ export function FarmProvider({ children }) {
         badgeBg = '#FFF3E0';
       }
 
-      // Only flag notSuitable if score is genuinely low, or severe water/soil conflict
-      const notSuitable = finalScore < 60 || (waterConflict && agronomy.waterNeed === 'high') || (soilType === 'rocky' && soilAdj <= -40);
+      // Only flag notSuitable if score is genuinely low, severe water/soil conflict, or lab conflict
+      const notSuitable = finalScore < 60 || 
+        (waterConflict && agronomy.waterNeed === 'high') || 
+        (soilType === 'rocky' && soilAdj <= -40) ||
+        (isLabMode && cropSoilLab?.severeConflict);
 
       // 7. Area-scaled Economics
       const areaProfitMin = Math.round(crop.profitMin * normalizedAcres);
@@ -489,7 +555,9 @@ export function FarmProvider({ children }) {
 
       // Dynamic factor values & statuses
       const regFactors = reg?.factors || {};
-      const soilScore = Math.min(100, Math.max(30, (regFactors.soil || crop.factors.soil || 80) + Math.round(soilAdj * 0.5)));
+      const soilScore = isLabMode && cropSoilLab 
+        ? cropSoilLab.soilLabScore 
+        : Math.min(100, Math.max(30, (regFactors.soil || crop.factors.soil || 80) + Math.round(soilAdj * 0.5)));
       const rainScore = Math.min(100, Math.max(30, (regFactors.rain || crop.factors.rain || 80)));
       const tempScore = Math.min(100, Math.max(30, (regFactors.temp || crop.factors.temp || 85)));
       const irrScore = waterSource === 'rainfed' && agronomy.waterNeed === 'high' ? 35 : Math.min(100, Math.max(30, (regFactors.irrigation || crop.factors.irrigation || 80)));
@@ -511,6 +579,8 @@ export function FarmProvider({ children }) {
         matchReason_mr,
         matchReason_en,
         regionalAnalysis: true,
+        soilLabMatch: cropSoilLab,
+        recommendationMode,
         notSuitable,
         seasonConflict,
         waterConflict,
@@ -550,7 +620,7 @@ export function FarmProvider({ children }) {
       if (a.notSuitable !== b.notSuitable) return a.notSuitable ? 1 : -1;
       return b.score - a.score;
     }).map((c, idx) => ({ ...c, rank: idx + 1 }));
-  }, [district, tehsil, soilType, waterSource, season, normalizedAcres]);
+  }, [district, tehsil, soilType, waterSource, season, normalizedAcres, recommendationMode, soilLabData]);
 
   // Audio Text-to-Speech
   const speakText = (text) => {
@@ -597,7 +667,16 @@ export function FarmProvider({ children }) {
         cropId,
         date: lang === 'mr' ? 'आज' : 'Today',
         area: landArea,
-        tehsil
+        tehsil,
+        mode: recommendationMode,
+        soilLabSummary: recommendationMode === 'soil_lab' && soilLabData ? {
+          ph: soilLabData.ph,
+          ec: soilLabData.ec,
+          oc: soilLabData.organicCarbon,
+          n: soilLabData.nitrogen,
+          p: soilLabData.phosphorus,
+          k: soilLabData.potassium
+        } : null
       };
       return [newEntry, ...filtered].slice(0, 10);
     });
@@ -651,7 +730,15 @@ export function FarmProvider({ children }) {
     stopAudio,
     isPlayingAudio,
     isLocationModalOpen,
-    setLocationModalOpen
+    setLocationModalOpen,
+    recommendationMode,
+    setRecommendationMode,
+    soilLabData,
+    setSoilLabData,
+    savedSoilProfiles,
+    saveSoilLabProfile,
+    clearSoilLabData,
+    soilHealthGap
   };
 
   return <FarmContext.Provider value={value}>{children}</FarmContext.Provider>;
@@ -661,4 +748,4 @@ export function useFarm() {
   const context = useContext(FarmContext);
   if (!context) throw new Error('useFarm must be used within FarmProvider');
   return context;
-}
+}

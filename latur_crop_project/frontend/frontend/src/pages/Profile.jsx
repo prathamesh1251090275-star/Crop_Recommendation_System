@@ -11,7 +11,8 @@ import {
   Info,
   LogOut,
   PhoneCall,
-  CloudSun
+  CloudSun,
+  FlaskConical
 } from 'lucide-react';
 
 export default function Profile() {
@@ -24,7 +25,8 @@ export default function Profile() {
     landArea,
     landUnit,
     soilType,
-    setLocationModalOpen
+    setLocationModalOpen,
+    soilLabData
   } = useFarm();
 
   const [activeModal, setActiveModal] = useState(null);
@@ -78,7 +80,26 @@ export default function Profile() {
             <ChevronRight size={18} className="menu-arrow" />
           </div>
 
-          {/* Item 2: Search History */}
+          {/* Item 2: Smart Soil Lab Profile */}
+          <div
+            className="profile-menu-row"
+            onClick={() => navigate('/soil-lab')}
+          >
+            <div className="menu-icon-box" style={{ background: '#E0F2F1' }}>
+              <FlaskConical size={20} color="#00695C" />
+            </div>
+            <div className="menu-text-group">
+              <h4 className="menu-item-title" style={{ color: '#004D40' }}>{t('soilLabTitle')}</h4>
+              <p className="menu-item-sub">
+                {soilLabData
+                  ? `pH: ${soilLabData.ph || 7.2} • EC: ${soilLabData.ec || 0.45} dS/m • ${lang === 'mr' ? 'सक्रिय अहवाल' : 'Active Report'}`
+                  : (lang === 'mr' ? 'माती चाचणी अहवाल नोंदवा (ऐच्छिक)' : 'Enter laboratory soil test')}
+              </p>
+            </div>
+            <ChevronRight size={18} className="menu-arrow" />
+          </div>
+
+          {/* Item 3: Search History */}
           <div
             className="profile-menu-row"
             onClick={() => navigate('/history')}
@@ -93,7 +114,7 @@ export default function Profile() {
             <ChevronRight size={18} className="menu-arrow" />
           </div>
 
-          {/* Item 3: Weather & Advisories */}
+          {/* Item 4: Weather & Advisories */}
           <div
             className="profile-menu-row"
             onClick={() => setActiveModal('weather')}
@@ -108,22 +129,7 @@ export default function Profile() {
             <ChevronRight size={18} className="menu-arrow" />
           </div>
 
-          {/* Item 4: Settings & Location */}
-          <div
-            className="profile-menu-row"
-            onClick={() => setLocationModalOpen(true)}
-          >
-            <div className="menu-icon-box bg-gray-light">
-              <SettingsIcon size={20} color="#455A64" />
-            </div>
-            <div className="menu-text-group">
-              <h4 className="menu-item-title">{t('settings')}</h4>
-              <p className="menu-item-sub">{t('settingsSub')}</p>
-            </div>
-            <ChevronRight size={18} className="menu-arrow" />
-          </div>
-
-          {/* Item 5: Help & FAQ */}
+          {/* Item 5: Help & Guidance */}
           <div
             className="profile-menu-row"
             onClick={() => setActiveModal('help')}
@@ -222,15 +228,15 @@ export default function Profile() {
               <h4>{lang === 'mr' ? '1. योग्यता गुणांक कसा मोजला जातो?' : '1. How is suitability calculated?'}</h4>
               <p>
                 {lang === 'mr'
-                  ? 'तुमच्या भागातील मातीचा प्रकार, वार्षिक पाऊस, तापमान, सिंचन उपलब्धता आणि APMC बाजारभाव यांचा अभ्यास करून योग्यता ठरवली जाते.'
-                  : 'Scores are computed using regional soil type, rainfall distribution, temperatures, irrigation sources, and mandi pricing.'}
+                  ? 'तुमच्या भागातील मातीचा प्रकार, वार्षिक पाऊस, तापमान, सिंचन उपलब्धता आणि APMC बाजारभाव यांचा अभ्यास करून योग्यता ठरवली जाते. स्मार्ट सॉईल लॅब निवडल्यास प्रत्यक्ष लॅब रिपोर्टनुसार अधिक अचूक गुणांक मिळतो.'
+                  : 'Scores are computed using regional soil type, rainfall distribution, temperatures, irrigation sources, and mandi pricing, refined with lab chemistry when Smart Soil Lab is enabled.'}
               </p>
 
-              <h4 style={{ marginTop: '1rem' }}>{lang === 'mr' ? '2. माहिती ऐकण्यासाठी काय करावे?' : '2. How to listen to audio?'}</h4>
+              <h4 style={{ marginTop: '1rem' }}>{lang === 'mr' ? '2. स्मार्ट सॉईल लॅब कशी वापरावी?' : '2. How to use Smart Soil Lab?'}</h4>
               <p>
                 {lang === 'mr'
-                  ? '"माहिती ऐका" या बटणावर क्लिक करा. आपला फोन मराठीतून संपूर्ण माहिती वाचून दाखवेल.'
-                  : 'Click the "Listen Audio" button to hear spoken advice in your language.'}
+                  ? 'आपल्याकडील सॉईल हेल्थ कार्डावरील सामू (pH), क्षारता (EC), सेंद्रिय कर्ब (OC) व N-P-K चे आकडे टाका किंवा उदाहरणादाखल डेमो अहवाल वापरून अचूक शिफारसी पहा.'
+                  : 'Enter your laboratory tested soil pH, electrical conductivity, organic carbon, and NPK values from your Soil Health Card to get scientifically refined crop matches.'}
               </p>
             </div>
             <div className="modal-footer">
@@ -272,7 +278,6 @@ export default function Profile() {
           </div>
         </div>
       )}
-
-      </div>
+    </div>
   );
 }

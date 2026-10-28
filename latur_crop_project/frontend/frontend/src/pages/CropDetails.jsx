@@ -13,7 +13,9 @@ import {
   VolumeX,
   FileText,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  FlaskConical,
+  Activity
 } from 'lucide-react';
 
 export default function CropDetails() {
@@ -32,7 +34,8 @@ export default function CropDetails() {
     toggleBookmark,
     speakText,
     stopAudio,
-    isPlayingAudio
+    isPlayingAudio,
+    soilLabData
   } = useFarm();
 
   const [activeTab, setActiveTab] = useState('general'); // 'general' | 'technical' | 'market'
@@ -306,6 +309,54 @@ export default function CropDetails() {
                 </div>
               </div>
             </div>
+
+                        {/* Smart Soil Lab Diagnostic Card (if lab data available) */}
+            {crop.soilLabMatch && (
+              <div className="info-box-card" style={{ marginTop: '1rem', border: '1.5px solid #80CBC4', background: '#F2FAF9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <FlaskConical size={18} color="#00695C" />
+                    <h4 className="info-box-title" style={{ margin: 0, color: '#004D40' }}>
+                      {lang === 'mr' ? 'शास्त्रोक्त माती जुळणी अहवाल' : 'Scientific Soil Lab Diagnostic'}
+                    </h4>
+                  </div>
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    padding: '0.15rem 0.5rem',
+                    borderRadius: '12px',
+                    color: crop.soilLabMatch.matchColor,
+                    background: crop.soilLabMatch.matchBg,
+                    border: `1px solid ${crop.soilLabMatch.matchColor}`
+                  }}>
+                    {crop.soilLabMatch.soilLabScore}% जुळणी
+                  </span>
+                </div>
+
+                <div className="key-value-list">
+                  <div className="kv-row">
+                    <span>{lang === 'mr' ? 'आदर्श सामू (Ideal pH)' : 'Ideal pH Range'}</span>
+                    <strong>{crop.soilLabMatch.cropProfile.phOpt[0]} - {crop.soilLabMatch.cropProfile.phOpt[1]} (तुमचा: {soilLabData?.ph})</strong>
+                  </div>
+                  <div className="kv-row">
+                    <span>{lang === 'mr' ? 'कमाल क्षारता मर्यादा' : 'Max Salinity Limit'}</span>
+                    <strong>{crop.soilLabMatch.cropProfile.ecMax} dS/m (तुमची: {soilLabData?.ec} dS/m)</strong>
+                  </div>
+                  <div className="kv-row">
+                    <span>{lang === 'mr' ? 'अन्नद्रव्य भूक' : 'Nutrient Demand'}</span>
+                    <strong>
+                      {crop.soilLabMatch.cropProfile.isNFixer
+                        ? (lang === 'mr' ? 'नत्र फिक्सर (कमी नत्र लागते)' : 'N-Fixer (Low N need)')
+                        : `N: ${crop.soilLabMatch.cropProfile.nDemand}, P: ${crop.soilLabMatch.cropProfile.pDemand}, K: ${crop.soilLabMatch.cropProfile.kDemand}`}
+                    </strong>
+                  </div>
+                </div>
+
+                <p style={{ marginTop: '0.6rem', fontSize: '0.75rem', color: '#004D40', lineHeight: 1.35, background: '#E0F2F1', padding: '0.5rem', borderRadius: '6px' }}>
+                  💡 {lang === 'mr' ? crop.soilLabMatch.cropProfile.note_mr : crop.soilLabMatch.cropProfile.note_en}
+                </p>
+              </div>
+            )}
 
             {/* Important Tips */}
             <div className="info-box-card" style={{ marginTop: '1rem' }}>

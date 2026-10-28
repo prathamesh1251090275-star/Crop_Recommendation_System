@@ -11,6 +11,7 @@ import Compare from './pages/Compare';
 import CropFacts from './pages/CropFacts';
 import Profile from './pages/Profile';
 import History from './pages/History';
+import Soil from './pages/Soil';
 
 import BottomNav from './components/BottomNav';
 import LocationModal from './components/LocationModal';
@@ -36,6 +37,8 @@ function App() {
                 <Route path="/crop-facts" element={<CropFacts />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/history" element={<History />} />
+                <Route path="/soil" element={<Soil />} />
+                <Route path="/soil-lab" element={<Soil />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>

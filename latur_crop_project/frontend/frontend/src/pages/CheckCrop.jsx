@@ -16,7 +16,8 @@ import {
   CloudRain,
   Thermometer,
   Droplets,
-  Store
+  Store,
+  FlaskConical
 } from 'lucide-react';
 
 export default function CheckCrop() {
@@ -224,6 +225,14 @@ export default function CheckCrop() {
               </div>
             </div>
           </div>
+
+          {/* Smart Soil Lab Match Badge */}
+          {crop.soilLabMatch && (
+            <div style={{ marginTop: '0.8rem', padding: '0.5rem 0.7rem', background: '#E0F2F1', borderRadius: '8px', fontSize: '0.75rem', color: '#004D40', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid #80CBC4' }}>
+              <FlaskConical size={16} color="#00695C" />
+              <span><strong>{lang === 'mr' ? 'लॅब माती चाचणी जुळणी:' : 'Lab Soil Test Match:'}</strong> {crop.soilLabMatch.soilLabScore}% ({lang === 'mr' ? crop.soilLabMatch.matchDegree_mr : crop.soilLabMatch.matchDegree_en})</span>
+            </div>
+          )}
 
           {/* Advice Bulb Banner */}
           <div className="guidance-banner" style={{ marginTop: '1rem' }}>
