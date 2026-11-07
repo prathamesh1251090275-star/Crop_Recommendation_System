@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFarm } from '../context/useFarm';
+import SoilHealthGapCard from '../components/SoilHealthGapCard';
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,11 +10,9 @@ import {
   CheckCircle2,
   IndianRupee,
   FlaskConical,
-  Activity,
   AlertTriangle,
   ChevronDown,
-  ChevronUp,
-  ShieldCheck
+  ChevronUp
 } from 'lucide-react';
 
 export default function Recommendations() {
@@ -150,7 +149,7 @@ export default function Recommendations() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.72rem', fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap' }}>
                 <span>{showGapAnalysis ? t('hideSoilGapAnalysis') : t('viewSoilGapAnalysis')}</span>
                 {showGapAnalysis ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </div>
@@ -158,106 +157,7 @@ export default function Recommendations() {
 
             {/* Collapsible Soil Health Gap Analysis Card */}
             {showGapAnalysis && (
-              <div
-                style={{
-                  background: '#FFFFFF',
-                  borderRadius: '12px',
-                  border: '1.5px solid #80CBC4',
-                  marginTop: '0.5rem',
-                  padding: '0.85rem',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                }}
-              >
-                {/* Header with Health Score */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #ECEFF1', paddingBottom: '0.6rem', marginBottom: '0.7rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Activity size={18} color="#00695C" />
-                    <strong style={{ fontSize: '0.9rem', color: '#004D40' }}>{t('soilHealthGapTitle')}</strong>
-                  </div>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: '20px',
-                    color: soilHealthGap.badgeColor,
-                    background: soilHealthGap.badgeBg,
-                    border: `1px solid ${soilHealthGap.badgeColor}`
-                  }}>
-                    {soilHealthGap.healthScore}% • {lang === 'mr' ? soilHealthGap.healthStatus_mr : soilHealthGap.healthStatus_en}
-                  </div>
-                </div>
-
-                {/* 6-Parameters Diagnostic Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                  {Object.entries(soilHealthGap.params).map(([key, item]) => {
-                    const statusColor = item.status === 'good' ? '#1B5E20' : item.status === 'warning' ? '#E65100' : '#C62828';
-                    const statusBg = item.status === 'good' ? '#E8F5E9' : item.status === 'warning' ? '#FFF3E0' : '#FFEBEE';
-                    return (
-                      <div
-                        key={key}
-                        style={{
-                          background: '#F9FAF9',
-                          border: `1px solid ${item.status === 'danger' ? '#EF9A9A' : '#E0E0E0'}`,
-                          borderRadius: '8px',
-                          padding: '0.5rem'
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#333' }}>
-                            {key.toUpperCase()}
-                          </span>
-                          <span style={{
-                            fontSize: '0.65rem',
-                            fontWeight: 700,
-                            padding: '0.1rem 0.35rem',
-                            borderRadius: '4px',
-                            color: statusColor,
-                            background: statusBg
-                          }}>
-                            {item.value} {key === 'ph' ? '' : key === 'ec' ? 'dS/m' : key === 'organicCarbon' ? '%' : 'kg/ha'}
-                          </span>
-                        </div>
-                        <p style={{ margin: 0, fontSize: '0.68rem', color: statusColor, fontWeight: 600 }}>
-                          {lang === 'mr' ? item.label_mr : item.label_en}
-                        </p>
-                        <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.65rem', color: '#555', lineHeight: 1.2 }}>
-                          {lang === 'mr' ? item.gap_mr : item.gap_en}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Corrective Action Summary Box */}
-                <div style={{ marginTop: '0.7rem', padding: '0.6rem', background: '#F1F8E9', borderRadius: '8px', border: '1px solid #C5E1A5' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.3rem' }}>
-                    <ShieldCheck size={16} color="#2E7D32" />
-                    <strong style={{ fontSize: '0.75rem', color: '#1B5E20' }}>
-                      {lang === 'mr' ? 'शास्त्रोक्त माती सुधारणा सल्ला (Corrective Advisory):' : 'Soil Amendment Guidance:'}
-                    </strong>
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.68rem', color: '#33691E', lineHeight: 1.35 }}>
-                    {soilHealthGap.params.ph.status !== 'good' && (
-                      <li>{lang === 'mr' ? soilHealthGap.params.ph.advisory_mr : soilHealthGap.params.ph.advisory_en}</li>
-                    )}
-                    {soilHealthGap.params.organicCarbon.status !== 'good' && (
-                      <li>{lang === 'mr' ? soilHealthGap.params.organicCarbon.advisory_mr : soilHealthGap.params.organicCarbon.advisory_en}</li>
-                    )}
-                    {soilHealthGap.params.phosphorus.status !== 'good' && (
-                      <li>{lang === 'mr' ? soilHealthGap.params.phosphorus.advisory_mr : soilHealthGap.params.phosphorus.advisory_en}</li>
-                    )}
-                    {soilHealthGap.params.ec.status !== 'good' && (
-                      <li>{lang === 'mr' ? soilHealthGap.params.ec.advisory_mr : soilHealthGap.params.ec.advisory_en}</li>
-                    )}
-                    {soilHealthGap.params.potassium.status !== 'good' && (
-                      <li>{lang === 'mr' ? soilHealthGap.params.potassium.advisory_mr : soilHealthGap.params.potassium.advisory_en}</li>
-                    )}
-                    {soilHealthGap.healthScore >= 80 && (
-                      <li>{lang === 'mr' ? 'मातीतील मूलद्रव्ये समाधानकारक आहेत; सेंद्रिय खतांचा नियमित वापर कायम ठेवा.' : 'Soil elements are well balanced; maintain organic recycling.'}</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
+              <SoilHealthGapCard gap={soilHealthGap} lang={lang} t={t} className="shc-gap--inline" />
             )}
           </div>
         )}

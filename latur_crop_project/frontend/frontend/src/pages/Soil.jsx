@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFarm } from '../context/useFarm';
 import { analyzeSoilHealthGap, soilLabCompleteness, validateSoilLabInputs } from '../data/soilLabEngine';
+import SoilHealthGapCard from '../components/SoilHealthGapCard';
 import {
   Activity,
   AlertTriangle,
@@ -12,7 +13,6 @@ import {
   FlaskConical,
   RotateCcw,
   Save,
-  ShieldCheck,
   Sparkles,
   Sprout
 } from 'lucide-react';
@@ -42,24 +42,6 @@ const SOIL_OPTIONS = [
   { id: 'rocky', labelKey: 'soilRocky' },
   { id: 'mixed', labelKey: 'soilMixed' }
 ];
-
-const PARAM_CODE = {
-  ph: 'pH',
-  ec: 'EC',
-  organicCarbon: 'OC',
-  nitrogen: 'N',
-  phosphorus: 'P',
-  potassium: 'K'
-};
-
-const PARAM_UNIT = {
-  ph: '',
-  ec: 'dS/m',
-  organicCarbon: '%',
-  nitrogen: 'kg/ha',
-  phosphorus: 'kg/ha',
-  potassium: 'kg/ha'
-};
 
 const toForm = (data) => ({
   ph: data?.ph ?? '',
@@ -282,70 +264,7 @@ export default function Soil() {
           </section>
 
           {/* 3. Gap analysis — only rendered from a complete report */}
-          {gap && (
-            <section className="shc-card">
-              <div className="shc-head">
-                <h3 className="shc-title">
-                  <ShieldCheck size={18} color="#2E7D32" />
-                  {t('soilHealthGapTitle')}
-                </h3>
-                <span className="shc-score" style={{ color: gap.badgeColor }}>{gap.healthScore}%</span>
-              </div>
-              <p className="shc-note">
-                {t('soilHealthGapSub')} — {lang === 'mr' ? gap.healthStatus_mr : gap.healthStatus_en}
-              </p>
-
-              <div className="shc-param-grid">
-                {Object.entries(gap.params).map(([key, item]) => {
-                  const tone = item.status === 'danger'
-                    ? 'shc-param--danger'
-                    : item.status === 'warning'
-                      ? 'shc-param--warning'
-                      : '';
-                  const toneColor = item.status === 'good'
-                    ? '#1B5E20'
-                    : item.status === 'warning'
-                      ? '#E65100'
-                      : '#C62828';
-                  return (
-                    <div key={key} className={`shc-param ${tone}`.trim()}>
-                      <div className="shc-param-top">
-                        <span className="shc-param-name">{PARAM_CODE[key] || key}</span>
-                        <span className="shc-param-val" style={{ color: toneColor }}>
-                          {item.value}{PARAM_UNIT[key] ? ` ${PARAM_UNIT[key]}` : ''}
-                        </span>
-                      </div>
-                      <p className="shc-param-state" style={{ color: toneColor }}>
-                        {lang === 'mr' ? item.label_mr : item.label_en}
-                      </p>
-                      <p className="shc-param-gap">{lang === 'mr' ? item.gap_mr : item.gap_en}</p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="shc-advisory">
-                <h4 className="shc-advisory-title">
-                  <ShieldCheck size={15} />
-                  {lang === 'mr' ? 'सुधारणा सल्ला' : 'Corrective advisory'}
-                </h4>
-                <ul>
-                  {Object.entries(gap.params)
-                    .filter(([, item]) => item.status !== 'good')
-                    .map(([key, item]) => (
-                      <li key={key}>{lang === 'mr' ? item.advisory_mr : item.advisory_en}</li>
-                    ))}
-                  {gap.healthScore >= 80 && (
-                    <li>
-                      {lang === 'mr'
-                        ? 'मातीचे घटक सुस्थितीत आहेत; नियमित सेंद्रिय व्यवस्थापन सुरू ठेवा.'
-                        : 'Soil fertility is balanced; maintain organic matter with compost or green manure.'}
-                    </li>
-                  )}
-                </ul>
-              </div>
-            </section>
-          )}
+          {gap && <SoilHealthGapCard gap={gap} lang={lang} t={t} />}
 
           {/* 4. Soil type — part of the farm profile, not the lab report */}
           <section className="shc-card">
