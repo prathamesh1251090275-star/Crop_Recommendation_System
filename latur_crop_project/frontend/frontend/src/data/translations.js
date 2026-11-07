@@ -216,7 +216,20 @@ export const translations = {
     soilLabMatchPill: 'माती सुसंगतता',
     soilLabNoteTitle: 'शास्त्रोक्त माती विश्लेषण',
     viewSoilGapAnalysis: 'माती आरोग्य अहवाल पहा',
-    hideSoilGapAnalysis: 'अहवाल बंद करा'
+    hideSoilGapAnalysis: 'अहवाल बंद करा',
+    labActiveBadge: 'सक्रिय अहवाल',
+    shcTitle: 'माती आरोग्य पत्रिका',
+    shcStatusTitle: 'तुमचा माती अहवाल',
+    shcNoReportNote: 'तुमच्या शेताचा माती चाचणी अहवाल जोडलेला नाही. तो जोडेपर्यंत शिफारस प्रादेशिक माती प्रोफाइलवर आधारित राहील.',
+    shcEnterReport: 'माझ्याकडे माती चाचणी अहवाल आहे',
+    shcEnterReportHint: 'माती आरोग्य पत्रिकेवरील (Soil Health Card) आकडे टाका',
+    shcFormIntro: 'पत्रिकेवर छापलेली सहा मूल्ये जशी आहेत तशी टाका. लॅब मोडसाठी सहाही आवश्यक आहेत; एखादे रिकामे राहिल्यास शिफारस प्रादेशिक माती प्रोफाइलवर राहील.',
+    shcValuesEntered: 'भरलेली मूल्ये',
+    shcReady: 'अहवाल पूर्ण — लॅब मोड सक्रिय',
+    shcNotReadyHint: 'लॅब मोडसाठी पत्रिकेतील सहाही मूल्ये आवश्यक',
+    shcSaved: 'जतन केलेला अहवाल',
+    shcUseStandard: 'सर्वसाधारण शिफारस वापरा',
+    shcViewRecommendations: 'या माती अहवालानुसार पीक शिफारसी पहा'
 
   },
 
@@ -436,7 +449,20 @@ export const translations = {
     soilLabMatchPill: 'Soil Match',
     soilLabNoteTitle: 'Scientific Soil Analysis',
     viewSoilGapAnalysis: 'View Soil Health Card',
-    hideSoilGapAnalysis: 'Close Report'
+    hideSoilGapAnalysis: 'Close Report',
+    labActiveBadge: 'Report Active',
+    shcTitle: 'Soil Health Card',
+    shcStatusTitle: 'Your soil report',
+    shcNoReportNote: 'No soil test report is attached to your farm yet. Until you add one, recommendations use the regional soil profile.',
+    shcEnterReport: 'I have a soil test report',
+    shcEnterReportHint: 'Enter the values printed on your Soil Health Card',
+    shcFormIntro: 'Enter all six values exactly as printed on your card. Lab mode needs all of them; if one is missing, recommendations stay on the regional soil profile.',
+    shcValuesEntered: 'Values entered',
+    shcReady: 'Report complete — lab mode on',
+    shcNotReadyHint: 'Lab mode needs all 6 values from the card',
+    shcSaved: 'Saved report',
+    shcUseStandard: 'Use standard recommendation',
+    shcViewRecommendations: 'View crop recommendations for this soil report'
 
   }
 };

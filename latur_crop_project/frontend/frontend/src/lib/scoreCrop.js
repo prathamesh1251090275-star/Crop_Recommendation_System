@@ -21,7 +21,7 @@ import {
   SPECIALTY_POINTS,
   SPECIALTY_MIN_BASE,
 } from '../data/regionalSpecialties.js';
-import { computeCropSoilLabScore } from '../data/soilLabEngine.js';
+import { computeCropSoilLabScore, isSoilLabProfileUsable } from '../data/soilLabEngine.js';
 
 // Hard bounds on every adjustment. A prior may refine the measured score; it
 // may never reverse it.
@@ -173,7 +173,7 @@ export function scoreCrop(crop, regional, ctx) {
   }
 
   // ---- 7. Smart Soil Lab --------------------------------------------------
-  const isLabMode = recommendationMode === 'soil_lab' && !!soilLabData;
+  const isLabMode = recommendationMode === 'soil_lab' && isSoilLabProfileUsable(soilLabData);
   const soilLabMatch = isLabMode ? computeCropSoilLabScore(crop.id, soilLabData) : null;
   let labDelta = 0;
   if (soilLabMatch && Number.isFinite(soilLabMatch.soilLabScore)) {

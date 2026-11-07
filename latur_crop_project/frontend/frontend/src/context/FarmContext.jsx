@@ -5,7 +5,7 @@ import { CROPS_DATA } from '../data/cropsData';
 import { DISTRICTS, TEHSILS_BY_DISTRICT } from '../data/locations';
 import { REGIONAL_SCORES } from '../data/regionalScores';
 import { MANDI_PRICES } from '../data/mandiPrices';
-import { analyzeSoilHealthGap } from '../data/soilLabEngine';
+import { analyzeSoilHealthGap, isSoilLabProfileUsable } from '../data/soilLabEngine';
 import { getRegionalSpecialties, getRegionNote } from '../data/regionalSpecialties';
 import { scoreCrop, rankCrops } from '../lib/scoreCrop';
 
@@ -28,6 +28,10 @@ export function FarmProvider({ children }) {
       return null;
     }
   });
+  // A lab profile only drives scoring when every Soil Health Card parameter is
+  // present. A partial card must never be padded with assumed values.
+  const isSoilLabReady = isSoilLabProfileUsable(soilLabData);
+
   const [savedSoilProfiles, setSavedSoilProfiles] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('pm_saved_soil_profiles')) || [];
@@ -100,11 +104,11 @@ export function FarmProvider({ children }) {
 
   // Soil Health Gap Analysis memo
   const soilHealthGap = useMemo(() => {
-    if (recommendationMode === 'soil_lab' && soilLabData) {
+    if (recommendationMode === 'soil_lab' && isSoilLabReady) {
       return analyzeSoilHealthGap(soilLabData);
     }
     return null;
-  }, [recommendationMode, soilLabData]);
+  }, [recommendationMode, isSoilLabReady, soilLabData]);
 
   const saveSoilLabProfile = (profile) => {
     if (!profile) return;
@@ -155,14 +159,14 @@ export function FarmProvider({ children }) {
       waterSource,
       season,
       acres: normalizedAcres,
-      recommendationMode,
+      recommendationMode: recommendationMode === 'soil_lab' && isSoilLabReady ? 'soil_lab' : 'standard',
       soilLabData,
     };
 
     return rankCrops(
       CROPS_DATA.map((crop) => scoreCrop(crop, regionalById.get(crop.id), scoringContext))
     );
-  }, [district, districtName, tehsil, soilType, waterSource, season, normalizedAcres, recommendationMode, soilLabData]);
+  }, [district, districtName, tehsil, soilType, waterSource, season, normalizedAcres, recommendationMode, isSoilLabReady, soilLabData]);
 
   // Audio Text-to-Speech
   const speakText = (text) => {

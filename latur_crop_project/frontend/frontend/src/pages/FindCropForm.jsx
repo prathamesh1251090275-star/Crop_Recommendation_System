@@ -10,7 +10,7 @@ import {
   RotateCcw,
   Sparkles
 } from 'lucide-react';
-import { validateSoilLabInputs } from '../data/soilLabEngine';
+import { isSoilLabProfileUsable, validateSoilLabInputs } from '../data/soilLabEngine';
 
 export default function FindCropForm() {
   const navigate = useNavigate();
@@ -268,6 +268,12 @@ export default function FindCropForm() {
               <p style={{ fontSize: '0.75rem', color: '#455A64', marginBottom: '0.8rem' }}>
                 {t('soilLabSub')}
               </p>
+
+              {!isSoilLabProfileUsable(labForm) && (
+                <p style={{ fontSize: '0.72rem', color: '#8A6D00', background: '#FFF8E1', border: '1px solid #FFE082', borderRadius: '8px', padding: '0.45rem 0.6rem', margin: '0 0 0.8rem' }}>
+                  {t('shcNotReadyHint')}
+                </p>
+              )}
 
               {/* 2-Column Grid for Lab Parameters */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.7rem' }}>

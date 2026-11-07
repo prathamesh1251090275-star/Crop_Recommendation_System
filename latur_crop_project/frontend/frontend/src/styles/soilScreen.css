@@ -1,0 +1,326 @@
+/* ============================================================
+   SOIL HEALTH CARD SCREEN
+   Scoped to the /soil-lab screen. Keeps the SHC layout out of
+   App.css so the screen's typography stays consistent.
+============================================================ */
+
+.shc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.shc-card {
+  background: #FFFFFF;
+  border: 1px solid #E3EAE7;
+  border-radius: 14px;
+  padding: 0.9rem 0.95rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.shc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.shc-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #004D40;
+  line-height: 1.25;
+}
+
+.shc-status {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.1;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.shc-status--ok {
+  color: #1B5E20;
+  background: #E8F5E9;
+  border-color: #A5D6A7;
+}
+
+.shc-status--absent {
+  color: #6D4C41;
+  background: #F4F0EE;
+  border-color: #D7CCC8;
+}
+
+.shc-note {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: #5B6B66;
+}
+
+.shc-note + .shc-note {
+  margin-top: 0.3rem;
+}
+
+.shc-reveal {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+  padding: 0.65rem 0.75rem;
+  border: 1.5px dashed #8FD0C8;
+  border-radius: 11px;
+  background: #F4FBFA;
+  color: #00695C;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shc-reveal:hover {
+  background: #E8F6F4;
+}
+
+.shc-form {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #ECEFF1;
+}
+
+.shc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.shc-field label {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #33413A;
+  line-height: 1.2;
+}
+
+.shc-unit {
+  font-weight: 500;
+  color: #8A9691;
+}
+
+.shc-input {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #CFD8DC;
+  border-radius: 9px;
+  background: #FFFFFF;
+  color: #1B2E27;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+.shc-input:focus {
+  outline: none;
+  border-color: #00695C;
+  box-shadow: 0 0 0 3px rgba(0, 105, 92, 0.12);
+}
+
+.shc-input--bad {
+  border-color: #D32F2F;
+  background: #FFF5F5;
+}
+
+.shc-err {
+  margin: 0.2rem 0 0;
+  font-size: 0.66rem;
+  line-height: 1.3;
+  color: #C62828;
+  font-weight: 600;
+}
+
+.shc-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.shc-meter--ready {
+  background: #E8F5E9;
+  color: #1B5E20;
+}
+
+.shc-meter--pending {
+  background: #FFF8E1;
+  color: #8A6D00;
+}
+
+.shc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.shc-btn {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.shc-btn--save {
+  background: #1B5E20;
+  color: #FFFFFF;
+}
+
+.shc-btn--sample {
+  background: #00695C;
+  color: #FFFFFF;
+}
+
+.shc-btn--ghost {
+  background: #FFFFFF;
+  color: #455A64;
+  border-color: #CFD8DC;
+}
+
+.shc-param-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  margin-top: 0.3rem;
+}
+
+.shc-param {
+  padding: 0.5rem 0.55rem;
+  border: 1px solid #E6EAE8;
+  border-radius: 10px;
+  background: #FAFBFB;
+}
+
+.shc-param--warning {
+  border-color: #FFCC80;
+  background: #FFFCF5;
+}
+
+.shc-param--danger {
+  border-color: #EF9A9A;
+  background: #FFF7F7;
+}
+
+.shc-param-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.3rem;
+  margin-bottom: 0.15rem;
+}
+
+.shc-param-name {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #2E3B36;
+}
+
+.shc-param-val {
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.shc-param-state {
+  margin: 0;
+  font-size: 0.67rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.shc-param-gap {
+  margin: 0.15rem 0 0;
+  font-size: 0.65rem;
+  line-height: 1.35;
+  color: #5B6B66;
+}
+
+.shc-advisory {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid #C5E1A5;
+  border-radius: 10px;
+  background: #F5FAEE;
+}
+
+.shc-advisory-title {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #2E7D32;
+}
+
+.shc-advisory ul {
+  margin: 0;
+  padding-left: 1.05rem;
+}
+
+.shc-advisory li {
+  margin-bottom: 0.25rem;
+  font-size: 0.69rem;
+  line-height: 1.4;
+  color: #33691E;
+}
+
+.shc-advisory li:last-child {
+  margin-bottom: 0;
+}
+
+.shc-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #81C784;
+  border-radius: 9px;
+  background: #E8F5E9;
+  color: #1B5E20;
+  font-size: 0.77rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.shc-score {
+  font-size: 0.78rem;
+  font-weight: 800;
+}

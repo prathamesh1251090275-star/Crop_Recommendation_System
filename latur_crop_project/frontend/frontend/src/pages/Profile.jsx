@@ -89,7 +89,7 @@ export default function Profile() {
               <h4 className="menu-item-title" style={{ color: '#004D40' }}>{t('soilLabTitle')}</h4>
               <p className="menu-item-sub">
                 {soilLabData
-                  ? `pH: ${soilLabData.ph || 7.2} • EC: ${soilLabData.ec || 0.45} dS/m • ${lang === 'mr' ? 'सक्रिय अहवाल' : 'Active Report'}`
+                  ? `pH ${soilLabData.ph} • EC ${soilLabData.ec} dS/m • ${t('labActiveBadge')}`
                   : (lang === 'mr' ? 'माती चाचणी अहवाल नोंदवा (ऐच्छिक)' : 'Enter laboratory soil test')}
               </p>
             </div>

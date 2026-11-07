@@ -128,7 +128,7 @@ export default function Home() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <h3 className="action-card-title" style={{ color: '#004D40' }}>{t('soilLabTitle')}</h3>
                 <span style={{ fontSize: '0.65rem', background: '#E0F2F1', color: '#00695C', padding: '0.1rem 0.35rem', borderRadius: '4px', fontWeight: 700 }}>
-                  {isLabActive ? 'सक्रिय' : t('optionalBadge')}
+                  {isLabActive ? t('labActiveBadge') : t('optionalBadge')}
                 </span>
               </div>
               <p className="action-card-desc" style={{ color: '#00695C' }}>

@@ -407,6 +407,44 @@ export const CROP_SOIL_SCIENCE_PROFILES = {
 // ---------------------------------------------------------------------------
 // 3. Input Validation
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Soil Health Card completeness
+// A lab profile may only influence scoring when every parameter printed on the
+// card is actually present. Anything less used to be padded with assumed
+// values (pH 7.2, EC 0.45, N 240 ...), which turned "scientific analysis" into
+// a fabricated score. This is the single gate used by the scoring layer and UI.
+// ---------------------------------------------------------------------------
+export const SOIL_LAB_FIELDS = ['ph', 'ec', 'organicCarbon', 'nitrogen', 'phosphorus', 'potassium'];
+
+/** Read a laboratory value without inventing one for a legitimate zero. */
+function labValue(raw, fallback) {
+  if (raw === undefined || raw === null || raw === '') return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+export function soilLabCompleteness(data) {
+  const filled = SOIL_LAB_FIELDS.filter((field) => {
+    if (!data) return false;
+    const raw = data[field];
+    return raw !== undefined && raw !== null && raw !== '' && Number.isFinite(Number(raw));
+  });
+  return {
+    filled,
+    missing: SOIL_LAB_FIELDS.filter((field) => !filled.includes(field)),
+    count: filled.length,
+    total: SOIL_LAB_FIELDS.length,
+    complete: filled.length === SOIL_LAB_FIELDS.length,
+  };
+}
+
+/** True only for a complete, physically plausible Soil Health Card entry. */
+export function isSoilLabProfileUsable(data) {
+  if (!soilLabCompleteness(data).complete) return false;
+  const ph = Number(data.ph);
+  return ph >= 3 && ph <= 11;
+}
+
 export function validateSoilLabInputs(data) {
   const errors = {};
   const warnings = {};
@@ -475,14 +513,14 @@ export function validateSoilLabInputs(data) {
 // 4. Soil Health Gap Analysis (Diagnostic & Amelioration Advisory)
 // ---------------------------------------------------------------------------
 export function analyzeSoilHealthGap(labData) {
-  if (!labData) return null;
+  if (!isSoilLabProfileUsable(labData)) return null;
 
-  const ph = Number(labData.ph) || 7.2;
-  const ec = Number(labData.ec) || 0.4;
-  const oc = Number(labData.organicCarbon) || 0.55;
-  const n = Number(labData.nitrogen) || 240;
-  const p = Number(labData.phosphorus) || 18;
-  const k = Number(labData.potassium) || 310;
+  const ph = labValue(labData.ph, 7.2);
+  const ec = labValue(labData.ec, 0.4);
+  const oc = labValue(labData.organicCarbon, 0.55);
+  const n = labValue(labData.nitrogen, 240);
+  const p = labValue(labData.phosphorus, 18);
+  const k = labValue(labData.potassium, 310);
 
   // 1. Parameter Evaluations
   const params = {};
@@ -744,11 +782,11 @@ export function computeCropSoilLabScore(cropId, labData) {
   };
 
   const ph = Number(labData.ph) || 7.2;
-  const ec = Number(labData.ec) || 0.4;
-  const oc = Number(labData.organicCarbon) || 0.55;
-  const n = Number(labData.nitrogen) || 240;
-  const p = Number(labData.phosphorus) || 18;
-  const k = Number(labData.potassium) || 310;
+  const ec = labValue(labData.ec, 0.4);
+  const oc = labValue(labData.organicCarbon, 0.55);
+  const n = labValue(labData.nitrogen, 240);
+  const p = labValue(labData.phosphorus, 18);
+  const k = labValue(labData.potassium, 310);
 
   const limitations_mr = [];
   const limitations_en = [];

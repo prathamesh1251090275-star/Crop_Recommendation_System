@@ -355,18 +355,18 @@ export default function CropDetails() {
                     background: crop.soilLabMatch.matchBg,
                     border: `1px solid ${crop.soilLabMatch.matchColor}`
                   }}>
-                    {crop.soilLabMatch.soilLabScore}% जुळणी
+                    {crop.soilLabMatch.soilLabScore}% {lang === 'mr' ? 'जुळणी' : 'match'}
                   </span>
                 </div>
 
                 <div className="key-value-list">
                   <div className="kv-row">
                     <span>{lang === 'mr' ? 'आदर्श सामू (Ideal pH)' : 'Ideal pH Range'}</span>
-                    <strong>{crop.soilLabMatch.cropProfile.phOpt[0]} - {crop.soilLabMatch.cropProfile.phOpt[1]} (तुमचा: {soilLabData?.ph})</strong>
+                    <strong>{crop.soilLabMatch.cropProfile.phOpt[0]} - {crop.soilLabMatch.cropProfile.phOpt[1]} ({lang === 'mr' ? 'तुमचा' : 'yours'}: {soilLabData?.ph})</strong>
                   </div>
                   <div className="kv-row">
                     <span>{lang === 'mr' ? 'कमाल क्षारता मर्यादा' : 'Max Salinity Limit'}</span>
-                    <strong>{crop.soilLabMatch.cropProfile.ecMax} dS/m (तुमची: {soilLabData?.ec} dS/m)</strong>
+                    <strong>{crop.soilLabMatch.cropProfile.ecMax} dS/m ({lang === 'mr' ? 'तुमची' : 'yours'}: {soilLabData?.ec} dS/m)</strong>
                   </div>
                   <div className="kv-row">
                     <span>{lang === 'mr' ? 'अन्नद्रव्य भूक' : 'Nutrient Demand'}</span>
