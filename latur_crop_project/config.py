@@ -3,6 +3,7 @@ Config for the Maharashtra Crop Recommendation project.
 Edit this file first — it's the single source of truth for which
 district(s), region(s), and crops the whole pipeline works with.
 """
+import os
 
 # --- Districts & regions ---------------------------------------------------
 # Each district has its own tehsils with real coordinates. Adding a new
@@ -406,8 +407,12 @@ CROPS = [
 WEATHER_START_DATE = "2010-01-01"
 WEATHER_END_DATE = "2025-12-31"
 
-# Get a free key at https://data.gov.in (register -> My Account -> API key)
-DATA_GOV_IN_API_KEY = "579b464db66ec23bdd000001a2da4d09062e4142656227258751c594"
+# Get a free key at https://data.gov.in (register -> My Account -> API key),
+# then set it as an environment variable. Never hard-code it here: this file
+# is public, and a committed key is a leaked key.
+#   Windows (PowerShell):  $env:DATA_GOV_IN_API_KEY = "your-key"
+#   macOS / Linux:         export DATA_GOV_IN_API_KEY="your-key"
+DATA_GOV_IN_API_KEY = os.environ.get("DATA_GOV_IN_API_KEY", "")
 AGMARKNET_RESOURCE_ID = "35985678-0d79-46b4-9ed6-6f13308a1d24"
 
 DB_PATH = "latur_crops.db"   # SQLite file — zero setup, swap for Postgres later

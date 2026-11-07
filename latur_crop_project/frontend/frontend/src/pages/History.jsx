@@ -1,6 +1,5 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '../context/useFarm';
 import { ChevronLeft, ChevronRight, Clock, FlaskConical, Sprout } from 'lucide-react';
 
 export default function History() {

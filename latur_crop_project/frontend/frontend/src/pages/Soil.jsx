@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '../context/useFarm';
 import {
   ChevronLeft,
   FlaskConical,
   Activity,
-  CheckCircle2,
-  AlertTriangle,
   RotateCcw,
   Sparkles,
   Save,
@@ -15,7 +13,6 @@ import {
   Sliders,
   Sprout
 } from 'lucide-react';
-import { validateSoilLabInputs } from '../data/soilLabEngine';
 
 export default function Soil() {
   const navigate = useNavigate();
@@ -126,8 +123,6 @@ export default function Soil() {
     }
     navigate('/recommendations');
   };
-
-  const validation = validateSoilLabInputs(labForm);
 
   return (
     <div className="mobile-screen soil-screen">

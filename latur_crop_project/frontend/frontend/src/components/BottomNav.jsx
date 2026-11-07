@@ -1,6 +1,5 @@
-import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '../context/useFarm';
 import { Home, BarChart2, History, User } from 'lucide-react';
 
 export default function BottomNav() {

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '../context/useFarm';
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,7 +13,6 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
-  Info,
   ShieldCheck
 } from 'lucide-react';
 

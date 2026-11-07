@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '../context/useFarm';
 import {
   ChevronLeft,
   Bookmark,
@@ -8,14 +8,12 @@ import {
   Clock,
   TrendingUp,
   Boxes,
-  IndianRupee,
   Volume2,
   VolumeX,
   FileText,
   CheckCircle2,
   AlertCircle,
-  FlaskConical,
-  Activity
+  FlaskConical
 } from 'lucide-react';
 
 export default function CropDetails() {
@@ -27,7 +25,6 @@ export default function CropDetails() {
     crops,
     landArea,
     landUnit,
-    normalizedAcres,
     districtName,
     districtMandi,
     bookmarks,

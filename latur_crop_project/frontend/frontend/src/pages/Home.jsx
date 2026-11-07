@@ -1,6 +1,5 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '../context/useFarm';
 import Header from '../components/Header';
 import { MapPin, Building2, ChevronRight, Sprout, Search, BookOpen, FlaskConical } from 'lucide-react';
 

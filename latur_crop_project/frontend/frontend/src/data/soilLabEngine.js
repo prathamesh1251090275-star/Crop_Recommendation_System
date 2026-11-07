@@ -755,7 +755,7 @@ export function computeCropSoilLabScore(cropId, labData) {
   let severeConflict = false;
 
   // 1. pH Score (0 - 100)
-  let phScore = 100;
+  let phScore;
   const [phOptMin, phOptMax] = profile.phOpt;
   const [phAbsMin, phAbsMax] = profile.phAbs;
 
@@ -793,7 +793,7 @@ export function computeCropSoilLabScore(cropId, labData) {
   }
 
   // 2. EC (Salinity) Score (0 - 100)
-  let ecScore = 100;
+  let ecScore;
   if (ec <= 1.0) {
     ecScore = 100;
   } else if (ec <= profile.ecMax) {

@@ -1,5 +1,4 @@
-import React from 'react';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '../context/useFarm';
 import { Sprout } from 'lucide-react';
 
 export default function Header() {

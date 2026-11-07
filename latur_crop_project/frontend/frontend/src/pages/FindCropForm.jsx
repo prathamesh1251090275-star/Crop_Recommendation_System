@@ -1,16 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFarm } from '../context/FarmContext';
-import Header from '../components/Header';
+import { useFarm } from '../context/useFarm';
 import {
   ChevronLeft,
   Sprout,
   HelpCircle,
   FlaskConical,
-  Activity,
   Sliders,
-  CheckCircle2,
-  AlertTriangle,
   RotateCcw,
   Sparkles
 } from 'lucide-react';

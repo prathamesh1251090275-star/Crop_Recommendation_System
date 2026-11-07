@@ -4,7 +4,9 @@ district in config.py, from the data.gov.in Agmarknet dataset.
 
 BEFORE RUNNING:
 1. Register at https://data.gov.in (free) -> My Account -> Generate API Key
-2. Paste that key into config.py as DATA_GOV_IN_API_KEY
+2. Set it as an environment variable (never commit it):
+       Windows (PowerShell):  $env:DATA_GOV_IN_API_KEY = "your-key"
+       macOS / Linux:         export DATA_GOV_IN_API_KEY="your-key"
 
 Run AFTER init_db.py (fetches ALL districts, skipping ones already done):
     python fetch_prices.py
@@ -76,8 +78,12 @@ def main():
     parser.add_argument("--district", help="Only fetch this district (default: all districts in config.py)")
     args = parser.parse_args()
 
-    if DATA_GOV_IN_API_KEY == "PASTE_YOUR_KEY_HERE":
-        print("ERROR: Set your data.gov.in API key in config.py first.")
+    if not DATA_GOV_IN_API_KEY:
+        print("ERROR: DATA_GOV_IN_API_KEY is not set.")
+        print("Get a free key at https://data.gov.in "
+              "(register -> My Account -> API key), then run:")
+        print('    Windows (PowerShell):  $env:DATA_GOV_IN_API_KEY = "your-key"')
+        print('    macOS / Linux:         export DATA_GOV_IN_API_KEY="your-key"')
         return
 
     conn = sqlite3.connect(DB_PATH)

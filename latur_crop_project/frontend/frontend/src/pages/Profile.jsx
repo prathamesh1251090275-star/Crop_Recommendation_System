@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '../context/useFarm';
 import {
   ChevronRight,
   User,
   History as HistoryIcon,
   Bell,
-  Settings as SettingsIcon,
   HelpCircle,
   Info,
   LogOut,
@@ -23,9 +22,7 @@ export default function Profile() {
     districtName,
     tehsilName,
     landArea,
-    landUnit,
     soilType,
-    setLocationModalOpen,
     soilLabData
   } = useFarm();
 

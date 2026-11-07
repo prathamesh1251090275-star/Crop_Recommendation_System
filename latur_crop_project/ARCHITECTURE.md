@@ -4,7 +4,7 @@ This document describes the entire project: every file, what it does, how the
 files connect to each other, the SQLite schema (with ER diagram), the scoring
 engine, and the frontend runtime flow.
 
-> Project root: `C:\Users\Prathamesh\OneDrive\Desktop\Crop_Recommendation_system\latur_crop_project\`
+> Project root: `latur_crop_project/` (the folder that contains this file).
 
 ---
 
@@ -102,7 +102,6 @@ agronomy advice, and a live mandi-price tab.
 | `build_tehsils_config.py` | Writes the `TEHSILS_BY_DISTRICT` block into `config.py` from `geocoded_tehsils.json` (backs up `config.py.bak`). | `geocoded_tehsils.json` | `config.py` |
 | `geocode_tehsils.py` | Geocodes tehsil names → lat/lon into `geocoded_tehsils.json`, failures to `geocode_failures.csv`. | `tehsil_list.json` | `geocoded_tehsils.json`, `geocode_failures.csv` |
 | `list_commodities.py`, `find_names.py`, `inspect_fields.py`, `test_connection.py`, `test_national.py` | One-off exploratory utilities (list agmarknet commodities, inspect API fields, test connectivity). | API / DB | console |
-| `app.py`, `app (4).py` | **Empty (0 bytes) placeholder files** — unused leftovers, safe to delete. | — | — |
 
 Run order for first-time setup (also see §8):
 
@@ -119,7 +118,6 @@ run_all.py ─► import_state_model.py ─► score_crops.py ─► generate_fr
 | `geocoded_tehsils.json` | Tehsil → lat/lon used to build `config.py`. |
 | `tehsil_list.json` | Raw tehsil name list. |
 | `geocode_failures.csv` | Tehsils that failed auto-geocoding. |
-| `config_tehsils_block.py.txt` | Backup/draft of the generated `TEHSILS_BY_DISTRICT` block. |
 
 ### 4.3 Frontend (`latur_crop_project\frontend\frontend\`)
 
@@ -138,9 +136,10 @@ frontend/frontend/
 │  │  ├─ mandiPrices.js    GENERATED — latest APMC prices per district/crop
 │  │  ├─ locations.js      Hand-written — 36 districts + 362 tehsils (names)
 │  │  ├─ translations.js   Hand-written — Marathi/English UI strings
-│  │  └─ crops.js          (legacy / unused flat crop list)
+│  │  └─ soilLabEngine.js  Hand-written — Smart Soil Lab scoring + gap analysis
+│  ├─ context/             FarmContext.jsx (provider) + useFarm.js (hook)
 │  ├─ pages/               Home, FindCropForm, Recommendations, CropDetails,
-│  │                       CheckCrop, Compare, CropFacts, Profile, History, …
+│  │                       CheckCrop, Compare, CropFacts, Profile, History, Soil, …
 │  └─ components/          CropCard, Header, BottomNav, LocationModal,
 │                          RadialGauge, StatCard
 ```
@@ -240,7 +239,7 @@ tehsils get `soil_score = NULL`.
 | source | TEXT | `SoilGrids` / `SoilHealthCard` |
 | recorded_date | TEXT | |
 
-**`weather_data`** (52,608 rows) — daily records (2020→2025), 24 tehsils × ~2,192 days.
+**`weather_data`** — daily records (2010→2025) for the 24 tehsils that were fetched.
 | Column | Type |
 |--------|------|
 | id | INTEGER PK |
@@ -391,11 +390,22 @@ For every `region × crop`:
    - if absent → raw `CROPS_DATA` (base state);
    - else override each matching crop’s `score`, `rank`, `factors`, `scoreMap`.
 3. Badge logic: `score ≥ 90 → Best`, `≥ 80 → Good`, `≥ 70 → Consider`.
-4. **`notSuitable = score < 60 || rank > 20`** → red “Do not grow” banner on
-   CropDetails (this is the hard gate that the rank-preservation in
-   `build_regional_scores` protects).
+4. **`notSuitable`** → red “Do not grow” banner on CropDetails. A crop is
+   flagged when its final score is `< 60`, when a high-water crop is forced
+   onto rainfed land, when rocky soil penalises it by `-40` or worse, or when
+   the Smart Soil Lab finds a severe pH/EC conflict.
 5. `MANDI_PRICES[district][cropId]` feeds the “Live Mandi Price” tab on the
    crop detail screen.
+6. **Regional overrides.** `REGIONAL_SPECIALTY_CROPS` applies GI/specialty
+   belts (Mahabaleshwar strawberry, Nashik grapes, Konkan cashew, Nagpur
+   orange…) as boosts, plus hard penalties for crops that do not belong
+   there. `CROP_AGRONOMY_MATRIX` adds soil-type, water-source, season and
+   land-size adjustments. The list is then re-sorted by score, not by the
+   model rank stored in `regionalScores.js`.
+7. **Smart Soil Lab (optional).** `data/soilLabEngine.js` re-scores each
+   crop against real lab values (pH, EC, organic carbon, N/P/K) and
+   produces an ICAR-style soil health gap analysis; `pages/Soil.jsx` is
+   the input screen. Set `recommendationMode` to `soil_lab` to use it.
 
 ---
 
@@ -429,8 +439,8 @@ npm run build                    # production build → dist/
 | `STATE` | `"Maharashtra"` |
 | `DISTRICTS` / `TEHSILS_BY_DISTRICT` | 36 districts; Latur 10 tehsils, Nagpur 14, others = single HQ point |
 | `CROPS` | 54 crops with ideal ranges / season / type / yield / MSP / cost |
-| `WEATHER_START_DATE` / `WEATHER_END_DATE` | `2020-01-01` → `2025-12-31` |
-| `DATA_GOV_IN_API_KEY` | Agmarknet API key (data.gov.in). **Do not commit/share.** |
+| `WEATHER_START_DATE` / `WEATHER_END_DATE` | `2010-01-01` → `2025-12-31` |
+| `DATA_GOV_IN_API_KEY` | Agmarknet API key, read from the `DATA_GOV_IN_API_KEY` environment variable. Never commit a key. |
 | `AGMARKNET_RESOURCE_ID` | `35985678-0d79-46b4-9ed6-6f13308a1d24` |
 | `COMMODITY_NAME_MAP` | our crop name → agmarknet dropdown spelling |
 

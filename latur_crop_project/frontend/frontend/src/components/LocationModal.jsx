@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useFarm } from '../context/FarmContext';
+import { useState } from 'react';
+import { useFarm } from '../context/useFarm';
 import { DISTRICTS, TEHSILS_BY_DISTRICT } from '../data/locations';
 import { X, MapPin, Check, Search } from 'lucide-react';
 

@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function RadialGauge({ score = 87, label = 'योग्यता', size = 130, strokeWidth = 10 }) {
   const radius = (size - strokeWidth) / 2;

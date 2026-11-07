@@ -1,12 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { FarmContext } from './useFarm';
 import { translations } from '../data/translations';
 import { CROPS_DATA } from '../data/cropsData';
 import { DISTRICTS, TEHSILS_BY_DISTRICT } from '../data/locations';
 import { REGIONAL_SCORES } from '../data/regionalScores';
 import { MANDI_PRICES } from '../data/mandiPrices';
-import { computeCropSoilLabScore, analyzeSoilHealthGap, validateSoilLabInputs } from '../data/soilLabEngine';
-
-const FarmContext = createContext();
+import { computeCropSoilLabScore, analyzeSoilHealthGap } from '../data/soilLabEngine';
 
 // ---------------------------------------------------------------------------
 // Maharashtra Geographical Indication (GI) & Specialty Agro-Fruit Belts
@@ -61,7 +60,7 @@ const REGIONAL_SPECIALTY_CROPS = {
     specialties: ['orange', 'cotton', 'soybean'],
     tehsilBoosts: {
       Katol: { orange: 98, cotton: 95 },
-      Saoner: { orange: 98, cotton: 95 },
+      Savner: { orange: 98, cotton: 95 },
       _all: { orange: 98, cotton: 95, soybean: 95 }
     }
   },
@@ -110,7 +109,7 @@ const REGIONAL_SPECIALTY_CROPS = {
       _all: { fig: 96, custard_apple: 95, onion: 95, guava: 94, sugarcane: 94 }
     }
   },
-  Ahmednagar: {
+  Ahilyanagar: {
     specialties: ['guava', 'pomegranate', 'onion'],
     tehsilBoosts: {
       Rahata: { guava: 98, pomegranate: 97, onion: 95 },
@@ -528,8 +527,8 @@ export function FarmProvider({ children }) {
       const areaYieldMax = (crop.yieldPerAcreMax * normalizedAcres).toFixed(1);
 
       // 8. Custom Recommendation Reasons
-      let matchReason_mr = '';
-      let matchReason_en = '';
+      let matchReason_mr;
+      let matchReason_en;
       if (isGISpecialty) {
         matchReason_mr = `${district} परिसरातील प्रसिद्ध व उच्च प्रतीचे पीक`;
         matchReason_en = `Renowned regional specialty of ${district}`;
@@ -744,8 +743,3 @@ export function FarmProvider({ children }) {
   return <FarmContext.Provider value={value}>{children}</FarmContext.Provider>;
 }
 
-export function useFarm() {
-  const context = useContext(FarmContext);
-  if (!context) throw new Error('useFarm must be used within FarmProvider');
-  return context;
-}
