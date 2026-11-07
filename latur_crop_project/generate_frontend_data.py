@@ -802,7 +802,7 @@ def build_crops_data(cur):
 
         avg_tr, avg_soil, avg_rain, avg_temp, avg_irr, avg_mkt = avg_scores.get(
             name, (None, None, None, None, None, None))
-        score = round(avg_tr) if avg_tr else 75
+        score = round(avg_tr) if avg_tr is not None else 75
         bkey, bcol, bbg = badge(score)
         rank = 1
 
@@ -855,11 +855,11 @@ def build_crops_data(cur):
             "peakArrival_mr": meta["peak"][0],
             "peakArrival_en": meta["peak"][1],
             "factors": {
-                "soil": factor_vals["soil"] if factor_vals["soil"] is not None else 75,
-                "rain": factor_vals["rain"] if factor_vals["rain"] is not None else 75,
-                "temp": factor_vals["temp"] if factor_vals["temp"] is not None else 75,
-                "irrigation": factor_vals["irrigation"] if factor_vals["irrigation"] is not None else 75,
-                "market": factor_vals["market"] if factor_vals["market"] is not None else 75,
+                "soil": factor_vals["soil"],
+                "rain": factor_vals["rain"],
+                "temp": factor_vals["temp"],
+                "irrigation": factor_vals["irrigation"],
+                "market": factor_vals["market"],
                 "soilStatus_mr": soil_s, "soilStatus_en": soil_e,
                 "rainStatus_mr": rain_s, "rainStatus_en": rain_e,
                 "tempStatus_mr": temp_s, "tempStatus_en": temp_e,

@@ -99,15 +99,44 @@ export default function CropDetails() {
           </div>
         </div>
 
-        {/* Regional Specialty Banner */}
-        {crop.isGISpecialty && (
-          <div className="guidance-banner" style={{ marginTop: '0.8rem', background: '#E0F2F1', borderColor: '#80CBC4' }}>
-            <CheckCircle2 size={20} color="#00695C" />
+        {/* Regional Specialty Banner - curated data, honest about confidence */}
+        {crop.regionalSpecialty && (
+          <div
+            className="guidance-banner"
+            style={{
+              marginTop: '0.8rem',
+              background: crop.regionalSpecialty.applied ? '#E0F2F1' : '#FFF8E1',
+              borderColor: crop.regionalSpecialty.applied ? '#80CBC4' : '#FFE082',
+            }}
+          >
+            <CheckCircle2 size={20} color={crop.regionalSpecialty.applied ? '#00695C' : '#E65100'} />
             <p className="guidance-text" style={{ color: '#004D40' }}>
-              <strong>{cropName}</strong> {lang === 'mr' ? `हे ${districtName} परिसरातील प्रसिद्ध व सर्वोत्तम उत्पन्न देणारे पीक आहे.` : `is a premier regional specialty of ${districtName}.`}
+              <strong>{cropName}</strong>{' '}
+              {crop.regionalSpecialty.caution
+                ? (lang === 'mr'
+                  ? `हे ${districtName} परिसरात प्रसिद्ध आहे, पण या तालुक्यातील जमीन व हवामानाची आकडेवारी त्यास पूर्ण समर्थन देत नाही. स्थानिक कृषी अधिकाऱ्यांशी खात्री करा.`
+                  : `is famous in ${districtName}, but this tehsil's soil and climate data does not fully support it. Confirm with your local agriculture officer.`)
+                : (lang === 'mr'
+                  ? `हे ${districtName} परिसरातील प्रसिद्ध व या भागासाठी योग्य पीक आहे.`
+                  : `is a recognised regional specialty that suits this area.`)}
             </p>
           </div>
         )}
+
+        {/* Where the score comes from */}
+        <div className="score-basis">
+          <span className={`score-basis-dot ${crop.scoreSource === 'measured' ? 'is-measured' : 'is-estimate'}`} />
+          <span className="score-basis-text">
+            {crop.scoreSource === 'measured'
+              ? (lang === 'mr' ? 'स्थानिक जमीन व हवामानाच्या मोजमापावर आधारित' : 'Based on measured soil and climate for this tehsil')
+              : (lang === 'mr' ? 'जिल्हा स्तरावरील अंदाज (तालुक्याची मोजमापे नाहीत)' : 'District-level estimate (no tehsil measurements)')}
+            {crop.dataGaps?.includes('soil') && (
+              <span className="score-basis-gap">
+                {lang === 'mr' ? ' • मातीची माहिती नाही' : ' • no soil data'}
+              </span>
+            )}
+          </span>
+        </div>
 
         {/* Not-suitable warning for low-fit regions */}
         {crop.notSuitable && (

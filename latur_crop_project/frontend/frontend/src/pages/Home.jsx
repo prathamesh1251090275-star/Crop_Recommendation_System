@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useFarm } from '../context/useFarm';
 import Header from '../components/Header';
-import { MapPin, Building2, ChevronRight, Sprout, Search, BookOpen, FlaskConical } from 'lucide-react';
+import { MapPin, Building2, ChevronRight, Sprout, Search, BookOpen, FlaskConical, Award } from 'lucide-react';
 
 export default function Home() {
   const navigate = useNavigate();
-  const { lang, t, districtName, tehsilName, setLocationModalOpen, recommendationMode, soilLabData } = useFarm();
+  const { lang, t, districtName, tehsilName, setLocationModalOpen, recommendationMode, soilLabData, regionalSpecialties, regionNote } = useFarm();
 
   const isLabActive = recommendationMode === 'soil_lab' && !!soilLabData;
 
@@ -58,6 +58,40 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+
+        {/* Famous crops of this district / tehsil - curated regional data */}
+        {regionalSpecialties.length > 0 && (
+          <section className="specialty-section">
+            <div className="specialty-header">
+              <Award size={18} color="#00695C" />
+              <h3 className="specialty-title">
+                {lang === 'mr' ? 'या भागातील प्रसिद्ध पिके' : 'Famous crops of this area'}
+              </h3>
+            </div>
+            {regionNote && (
+              <p className="specialty-note">{lang === 'mr' ? regionNote.note_mr : regionNote.note_en}</p>
+            )}
+            <div className="specialty-chips">
+              {regionalSpecialties.slice(0, 8).map((entry) => (
+                <button
+                  key={`${entry.level}-${entry.cropId}`}
+                  type="button"
+                  className={`specialty-chip ${entry.level === 'tehsil' ? 'is-tehsil' : ''}`}
+                  onClick={() => navigate(`/crop/${entry.cropId}`)}
+                >
+                  <span className="specialty-chip-name">
+                    {lang === 'mr' ? entry.crop.name_mr : entry.crop.name_en}
+                  </span>
+                  {entry.gi && <span className="specialty-chip-gi">GI</span>}
+                  {entry.level === 'tehsil' && (
+                    <span className="specialty-chip-level">{lang === 'mr' ? 'तालुका' : 'tehsil'}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Action Cards Grid */}
         <section className="main-actions-section">

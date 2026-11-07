@@ -1954,3 +1954,110 @@ html, body {
     box-shadow: none;
   }
 }
+
+/* --- Famous crops of this area (curated regional data) --- */
+.specialty-section {
+  margin: 0.9rem 1rem 0;
+  padding: 0.85rem 0.9rem;
+  background: #FFFFFF;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.specialty-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.specialty-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1B5E20;
+  margin: 0;
+}
+
+.specialty-note {
+  font-size: 0.75rem;
+  color: #5b6b5f;
+  margin: 0 0 0.6rem;
+  line-height: 1.4;
+}
+
+.specialty-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.specialty-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.32rem 0.55rem;
+  background: #F1F8E9;
+  border: 1px solid #C5E1A5;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #33691E;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.specialty-chip.is-tehsil {
+  background: #E0F2F1;
+  border-color: #80CBC4;
+  color: #004D40;
+}
+
+.specialty-chip-gi {
+  font-size: 0.6rem;
+  font-weight: 800;
+  background: #00695C;
+  color: #FFFFFF;
+  padding: 0.05rem 0.28rem;
+  border-radius: 4px;
+}
+
+.specialty-chip-level {
+  font-size: 0.6rem;
+  color: #00695C;
+  opacity: 0.75;
+}
+
+/* --- Where the score came from --- */
+.score-basis {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+  padding: 0.5rem 0.65rem;
+  background: #F5F7F5;
+  border-radius: 10px;
+}
+
+.score-basis-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 0.28rem;
+  flex: 0 0 auto;
+  background: #F57F17;
+}
+
+.score-basis-dot.is-measured {
+  background: #2E7D32;
+}
+
+.score-basis-text {
+  font-size: 0.7rem;
+  color: #4b5b4f;
+  line-height: 1.4;
+}
+
+.score-basis-gap {
+  color: #B3261E;
+  font-weight: 600;
+}
