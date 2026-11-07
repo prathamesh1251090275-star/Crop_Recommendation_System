@@ -287,7 +287,7 @@ export default function FindCropForm() {
                     step="0.1"
                     min="3.0"
                     max="11.0"
-                    placeholder="उदा. 7.2"
+                    placeholder="7.2"
                     value={labForm.ph}
                     onChange={(e) => handleLabChange('ph', e.target.value)}
                     style={{
@@ -300,7 +300,11 @@ export default function FindCropForm() {
                   />
                   {labForm.ph && (
                     <span style={{ fontSize: '0.68rem', color: Number(labForm.ph) >= 6.5 && Number(labForm.ph) <= 7.5 ? '#1B5E20' : '#E65100' }}>
-                      {Number(labForm.ph) < 6.5 ? 'आम्लधर्मी (Acidic)' : Number(labForm.ph) <= 7.5 ? 'उदासीन (Optimal)' : 'विम्लधर्मी (Alkaline)'}
+                      {Number(labForm.ph) < 6.5
+                        ? (lang === 'mr' ? 'आम्लधर्मी (Acidic)' : 'Acidic')
+                        : Number(labForm.ph) <= 7.5
+                          ? (lang === 'mr' ? 'उदासीन (Optimal)' : 'Optimal')
+                          : (lang === 'mr' ? 'विम्लधर्मी (Alkaline)' : 'Alkaline')}
                     </span>
                   )}
                 </div>
@@ -315,7 +319,7 @@ export default function FindCropForm() {
                     step="0.05"
                     min="0"
                     max="20"
-                    placeholder="उदा. 0.45"
+                    placeholder="0.45"
                     value={labForm.ec}
                     onChange={(e) => handleLabChange('ec', e.target.value)}
                     style={{
@@ -328,7 +332,9 @@ export default function FindCropForm() {
                   />
                   {labForm.ec && (
                     <span style={{ fontSize: '0.68rem', color: Number(labForm.ec) <= 1.0 ? '#1B5E20' : '#E65100' }}>
-                      {Number(labForm.ec) <= 1.0 ? 'सुरक्षित (< 1.0)' : 'मध्यम/जादा क्षारता'}
+                      {Number(labForm.ec) <= 1.0
+                        ? (lang === 'mr' ? 'सुरक्षित (< 1.0)' : 'Safe (< 1.0)')
+                        : (lang === 'mr' ? 'मध्यम/जादा क्षारता' : 'Moderate / high salinity')}
                     </span>
                   )}
                 </div>
@@ -343,7 +349,7 @@ export default function FindCropForm() {
                     step="0.05"
                     min="0"
                     max="5.0"
-                    placeholder="उदा. 0.55"
+                    placeholder="0.55"
                     value={labForm.organicCarbon}
                     onChange={(e) => handleLabChange('organicCarbon', e.target.value)}
                     style={{
@@ -356,7 +362,11 @@ export default function FindCropForm() {
                   />
                   {labForm.organicCarbon && (
                     <span style={{ fontSize: '0.68rem', color: Number(labForm.organicCarbon) >= 0.50 ? '#1B5E20' : '#D32F2F' }}>
-                      {Number(labForm.organicCarbon) < 0.50 ? 'कमी (< 0.50%)' : Number(labForm.organicCarbon) <= 0.75 ? 'मध्यम' : 'भरपूर (> 0.75%)'}
+                      {Number(labForm.organicCarbon) < 0.50
+                        ? (lang === 'mr' ? 'कमी (< 0.50%)' : 'Low (< 0.50%)')
+                        : Number(labForm.organicCarbon) <= 0.75
+                          ? (lang === 'mr' ? 'मध्यम' : 'Moderate')
+                          : (lang === 'mr' ? 'भरपूर (> 0.75%)' : 'High (> 0.75%)')}
                     </span>
                   )}
                 </div>
@@ -371,7 +381,7 @@ export default function FindCropForm() {
                     step="1"
                     min="0"
                     max="1200"
-                    placeholder="उदा. 240"
+                    placeholder="240"
                     value={labForm.nitrogen}
                     onChange={(e) => handleLabChange('nitrogen', e.target.value)}
                     style={{
@@ -384,7 +394,9 @@ export default function FindCropForm() {
                   />
                   {labForm.nitrogen && (
                     <span style={{ fontSize: '0.68rem', color: Number(labForm.nitrogen) >= 280 ? '#1B5E20' : '#D32F2F' }}>
-                      {Number(labForm.nitrogen) < 280 ? 'कमी (< 280)' : 'मध्यम/भरपूर'}
+                      {Number(labForm.nitrogen) < 280
+                        ? (lang === 'mr' ? 'कमी (< 280)' : 'Low (< 280)')
+                        : (lang === 'mr' ? 'मध्यम/भरपूर' : 'Moderate / high')}
                     </span>
                   )}
                 </div>
@@ -399,7 +411,7 @@ export default function FindCropForm() {
                     step="1"
                     min="0"
                     max="300"
-                    placeholder="उदा. 18"
+                    placeholder="18"
                     value={labForm.phosphorus}
                     onChange={(e) => handleLabChange('phosphorus', e.target.value)}
                     style={{
@@ -412,7 +424,9 @@ export default function FindCropForm() {
                   />
                   {labForm.phosphorus && (
                     <span style={{ fontSize: '0.68rem', color: Number(labForm.phosphorus) >= 23 ? '#1B5E20' : '#D32F2F' }}>
-                      {Number(labForm.phosphorus) < 23 ? 'कमी (< 23)' : 'मध्यम/भरपूर'}
+                      {Number(labForm.phosphorus) < 23
+                        ? (lang === 'mr' ? 'कमी (< 23)' : 'Low (< 23)')
+                        : (lang === 'mr' ? 'मध्यम/भरपूर' : 'Moderate / high')}
                     </span>
                   )}
                 </div>
@@ -427,7 +441,7 @@ export default function FindCropForm() {
                     step="1"
                     min="0"
                     max="1200"
-                    placeholder="उदा. 320"
+                    placeholder="320"
                     value={labForm.potassium}
                     onChange={(e) => handleLabChange('potassium', e.target.value)}
                     style={{
@@ -440,7 +454,11 @@ export default function FindCropForm() {
                   />
                   {labForm.potassium && (
                     <span style={{ fontSize: '0.68rem', color: Number(labForm.potassium) >= 140 ? '#1B5E20' : '#D32F2F' }}>
-                      {Number(labForm.potassium) < 140 ? 'कमी (< 140)' : Number(labForm.potassium) <= 280 ? 'मध्यम' : 'भरपूर (> 280)'}
+                      {Number(labForm.potassium) < 140
+                        ? (lang === 'mr' ? 'कमी (< 140)' : 'Low (< 140)')
+                        : Number(labForm.potassium) <= 280
+                          ? (lang === 'mr' ? 'मध्यम' : 'Moderate')
+                          : (lang === 'mr' ? 'भरपूर (> 280)' : 'High (> 280)')}
                     </span>
                   )}
                 </div>
