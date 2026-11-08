@@ -31,5 +31,4 @@ Thumbs.db
 *.sqlite-journal
 
 
-# Ignore large local SQLite database
-latur_crops.db
+# The compiled database is committed (5.8 MB) so scores are reproducible

@@ -162,6 +162,55 @@ def load_weather(cur, region_id):
     ).fetchall()
 
 
+SEASON_BY_MONTHS = {frozenset(v): k for k, v in SEASON_MONTHS.items()}
+
+
+def load_weather_summary(cur, region_id):
+    """
+    Rebuilds the weather_variables() structure from the precomputed
+    weather_year / weather_summary aggregates.
+
+    The shipped database stores per-season aggregates instead of ~1.7M raw
+    daily rows. They are the same sums and averages those rows produced, so
+    the derived scores are identical. Regions with raw daily weather still
+    take the load_weather() path and ignore these tables.
+    """
+    years = cur.execute(
+        "SELECT year, tmax_avg, tmin_avg, rain_mm FROM weather_year "
+        "WHERE region_id=? ORDER BY year",
+        (region_id,),
+    ).fetchall()
+    if not years:
+        return None
+
+    tm = [r[1] for r in years if r[1] is not None]
+    tn = [r[2] for r in years if r[2] is not None]
+    rains = [r[3] for r in years if r[3] is not None]
+
+    season_map = {}
+    for season, _year, rain_mm, et0_mm, dry in cur.execute(
+        "SELECT season, year, rain_mm, et0_mm, dry_days FROM weather_summary "
+        "WHERE region_id=? ORDER BY season, year",
+        (region_id,),
+    ):
+        entry = season_map.setdefault(
+            season, {"rain": [], "et0": [], "dry": []})
+        if rain_mm and rain_mm > 0:
+            entry["rain"].append(rain_mm)
+        if et0_mm and et0_mm > 0:
+            entry["et0"].append(et0_mm)
+        entry["dry"].append(dry if dry is not None else 0)
+
+    return {
+        "tmax_avg": sum(tm) / len(tm) if tm else None,
+        "tmin_avg": sum(tn) / len(tn) if tn else None,
+        "annual_rain_avg": sum(rains) / len(rains) if rains else None,
+        "annual_rain_by_year": {r[0]: r[3] for r in years},
+        "rows_by_year": {r[0]: [] for r in years},
+        "season_stats": season_map,
+    }
+
+
 def weather_variables(weather):
     """Returns (tmax_avg, tmin_avg, yearly_annual_rainfall, yearly_season,
     yearly_rain_season, yearly_ppet_season, longest_dry_spell_years, years).
@@ -326,13 +375,24 @@ def main():
         soil_ph = soil_row[0] if soil_row else None
 
         weather = load_weather(cur, region_id)
-        wv = weather_variables(weather)
+        if weather:
+            wv = weather_variables(weather)
+        else:
+            wv = load_weather_summary(cur, region_id)
 
         season_stats_cache = {}
         def get_cached_season_stats(months):
             m_key = tuple(sorted(months))
             if m_key not in season_stats_cache:
-                season_stats_cache[m_key] = season_stats(wv, months)
+                pre = None
+                if wv and "season_stats" in wv:
+                    name = SEASON_BY_MONTHS.get(frozenset(months))
+                    pre = wv["season_stats"].get(name) if name else None
+                if pre is not None:
+                    season_stats_cache[m_key] = (
+                        list(pre["rain"]), list(pre["et0"]), list(pre["dry"]))
+                else:
+                    season_stats_cache[m_key] = season_stats(wv, months)
             return season_stats_cache[m_key]
 
         district_row = district_factors.get(district, {})
