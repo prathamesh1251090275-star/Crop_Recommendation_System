@@ -46,29 +46,47 @@ WEATHER_YEARS = None   # filled at runtime from the region's weather data
 
 def score_range(value, ideal_min, ideal_max):
     """
-    Returns 0-100. 100 = squarely inside the ideal range.
-    Score decays linearly the further outside the range the value falls,
-    reaching 0 once it's 50% of the range-width away from the nearest edge.
+    Returns 0-100 for how well a value fits a crop's ideal band.
+
+    The inner 80% of the band scores 100 (a plateau - inside it the crop is
+    genuinely comfortable). Outside that core the score falls linearly to 0 at
+    the band edge plus half the band-width again.
+
+    A hard step ("100 anywhere inside the band") made dozens of crops land on
+    identical 0-100 sub-scores, which is why the composite collapsed onto a few
+    repeated integers (1064 rows all scored exactly 75). A continuous decay
+    keeps the ranking meaningful instead of quantising it.
     """
     if value is None or ideal_min is None or ideal_max is None:
         return None  # missing data - can't score, don't fake a number
-    if ideal_min <= value <= ideal_max:
+    if ideal_max < ideal_min:
+        ideal_min, ideal_max = ideal_max, ideal_min
+    width = ideal_max - ideal_min
+    if width <= 1e-9:
+        return 100.0 if abs(value - ideal_min) <= 1e-9 else max(
+            0.0, 100.0 - abs(value - ideal_min) * 10.0)
+    core = width * 0.10                      # inner 80% is full marks
+    inner_min, inner_max = ideal_min + core, ideal_max - core
+    if inner_min <= value <= inner_max:
         return 100.0
-    width = ideal_max - ideal_min or 1
-    if value < ideal_min:
-        distance = ideal_min - value
-    else:
-        distance = value - ideal_max
-    penalty = (distance / (width * 0.5)) * 100
-    return max(0.0, 100 - penalty)
+    distance = (inner_min - value) if value < inner_min else (value - inner_max)
+    tolerance = width * 0.5
+    return max(0.0, 100.0 * (1.0 - distance / tolerance))
 
 
 def parse_date(date_str):
-    """Agmarknet dates come as DD/MM/YYYY strings."""
-    try:
-        return datetime.datetime.strptime(date_str, "%d/%m/%Y").date()
-    except (ValueError, TypeError):
+    """
+    Dates are stored as ISO YYYY-MM-DD so SQL ordering works. Older exports and
+    raw Agmarknet payloads use DD/MM/YYYY, so both are accepted here.
+    """
+    if not date_str:
         return None
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y"):
+        try:
+            return datetime.datetime.strptime(date_str, fmt).date()
+        except (ValueError, TypeError):
+            continue
+    return None
 
 
 def get_market_info(cur, crop_id, district):
@@ -267,6 +285,9 @@ def season_stats(wv, months):
         streak = 0
         for date_str, tmax, tmin, rain, hum, sun, et0 in rows:
             if int(date_str[5:7]) not in months:
+                # Reset the streak outside the season: a dry run must not
+                # resume across the months the season skips over.
+                streak = 0
                 continue
             if rain is not None:
                 rain_sum += rain
@@ -486,9 +507,15 @@ def main():
             # -------- M: market factor ----------
             has_market, avg_price, trend_pct, n_records = get_cached_market_info(crop_id, district)
             if has_market:
-                market_score = 100.0
+                # Recent modal-price trend, clamped to +/-20 points around
+                # neutral. A flat "100 when any data exists" just rewarded
+                # being in a district with a price feed.
+                market_score = 60.0 + max(-20.0, min(20.0, (trend_pct or 0.0) * 0.5))
             else:
-                market_score = 60.0   # neutral - no evidence either way
+                # No price records anywhere in this district: exclude the
+                # factor instead of injecting a constant 60 into every crop,
+                # which only shifted scores without ranking anything.
+                market_score = None
 
             # -------- L: land multiplier (currently neutral) ----------
             land_mult = 1.0
@@ -530,16 +557,23 @@ def main():
                 overall = external_overall
                 suitability_source = "regional model estimate" if overall is not None else None
 
+            # Provenance: how many of the 7 factors actually contributed, and
+            # whether the number came from this pipeline or the imported model.
+            factors_present = sum(1 for v in components.values() if v is not None)
+            confidence = round(100.0 * factors_present / len(components), 1)
+            score_source = ("local" if local_overall is not None
+                            else ("external" if overall is not None else "none"))
+
             cur.execute(
                 """INSERT INTO crop_suitability_scores
                    (region_id, crop_id, soil_score, rainfall_score, temp_score,
                     water_score, growing_score, history_score, market_factor,
-                    land_multiplier, overall_score, has_market_data,
-                    avg_market_price, price_trend_pct)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    land_multiplier, overall_score, score_source, confidence,
+                    has_market_data, avg_market_price, price_trend_pct)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (region_id, crop_id, soil_score, rainfall_score, temp_score,
                  water_score, growing_score, history_score, market_score,
-                 land_mult, overall, int(has_market),
+                 land_mult, overall, score_source, confidence, int(has_market),
                  avg_price, trend_pct),
             )
             if overall is not None:

@@ -135,11 +135,18 @@ def main():
                 if modal_p == 0:
                     continue  # zero/blank prices are almost always bad data, not real zero prices
 
+                # Agmarknet sends DD/MM/YYYY. Store ISO so SQL date
+                # comparisons and ORDER BY work instead of comparing strings
+                # like "01/01/2026" > "31/12/2025".
+                arrival = (rec.get("Arrival_Date") or "").strip()
+                parts = arrival.replace("-", "/").split("/")
+                if len(parts) == 3 and len(parts[2]) == 4:
+                    arrival = "%s-%s-%s" % (parts[2], parts[1].zfill(2), parts[0].zfill(2))
                 cur.execute(
                     """INSERT INTO price_data
                        (crop_id, district, market_name, date, min_price, max_price, modal_price)
                        VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                    (crop_id, district_name, rec.get("Market"), rec.get("Arrival_Date"),
+                    (crop_id, district_name, rec.get("Market"), arrival,
                      min_p, max_p, modal_p),
                 )
                 inserted += 1

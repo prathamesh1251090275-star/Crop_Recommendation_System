@@ -181,7 +181,12 @@ export function scoreCrop(crop, regional, ctx) {
   }
 
   // ---- 8. Combine, then clamp to a real 0-100 scale -----------------------
-  let raw = base + soilDelta + specialtyPoints + waterDelta + seasonDelta + landDelta + labDelta;
+  let raw = base + soilDelta + specialtyPoints + waterDelta + seasonDelta + landDelta;
+  // Lab evidence moves the score a fraction of the remaining headroom instead
+  // of adding a flat bonus on top of an already-clipped number. Adding, then
+  // clamping at 100, is what made four different crops all read "100%".
+  if (labDelta > 0) raw += (100 - raw) * Math.min(0.6, labDelta / 40);
+  else raw += labDelta;
 
   if (excluded) raw = Math.min(raw, EXCLUDED_CAP);
   if (soilLabMatch?.severeConflict) raw = Math.min(raw, LAB_CONFLICT_CAP);

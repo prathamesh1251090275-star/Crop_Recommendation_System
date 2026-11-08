@@ -1023,9 +1023,12 @@ def build_regional_scores(cur, tehsil_aliases):
 
 
 def _date_key(d):
-    # price_data dates are stored as DD/MM/YYYY strings
+    # price_data dates are ISO (YYYY-MM-DD), which sorts correctly as text.
+    # Older exports used DD/MM/YYYY, so accept both.
+    if d and len(d) == 10 and d[4] == "-":
+        return d
     dd, mm, yyyy = d.split("/")
-    return (yyyy, mm, dd)
+    return "%s-%s-%s" % (yyyy, mm, dd)
 
 
 def build_mandi_prices(cur):

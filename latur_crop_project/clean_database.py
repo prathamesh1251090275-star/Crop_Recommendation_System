@@ -128,7 +128,7 @@ CREATE TABLE price_data (
     crop_id      INTEGER NOT NULL REFERENCES crops(crop_id) ON DELETE CASCADE,
     district     TEXT NOT NULL,
     market_name  TEXT,
-    date         TEXT NOT NULL,
+    date         TEXT NOT NULL CHECK (date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
     min_price    REAL,
     max_price    REAL,
     modal_price  REAL,
@@ -148,6 +148,8 @@ CREATE TABLE crop_suitability_scores (
     market_factor REAL,
     land_multiplier REAL,
     overall_score REAL,  -- NULL = not enough data to score this crop here
+    score_source TEXT,   -- 'local' = own weather, 'external' = regional model
+    confidence REAL,     -- % of the 7 factors actually present
     has_market_data INTEGER,
     avg_market_price REAL,
     price_trend_pct REAL,
@@ -164,6 +166,40 @@ CREATE INDEX idx_scores_crop ON crop_suitability_scores(crop_id);
 CREATE INDEX idx_scores_overall ON crop_suitability_scores(overall_score);
 CREATE INDEX idx_external_region ON external_suitability_scores(region_id);
 """
+
+
+def to_iso_date(value):
+    """Normalises DD/MM/YYYY (Agmarknet) to ISO YYYY-MM-DD so SQL sorting works."""
+    if not value:
+        return value
+    v = value.strip()
+    parts = v.replace("-", "/").split("/")
+    if len(parts) == 3:
+        if len(parts[0]) == 4:        # already YYYY-MM-DD (maybe unpadded)
+            y, m, d = parts
+        elif len(parts[2]) == 4:      # DD/MM/YYYY from Agmarknet
+            d, m, y = parts
+        else:
+            return v
+        return "%s-%s-%s" % (y.zfill(4), m.zfill(2), d.zfill(2))
+    return v
+
+
+def to_iso_date(value):
+    """Normalises DD/MM/YYYY (Agmarknet) to ISO YYYY-MM-DD so SQL sorting works."""
+    if not value:
+        return value
+    v = value.strip()
+    parts = v.replace("-", "/").split("/")
+    if len(parts) == 3:
+        if len(parts[0]) == 4:        # already YYYY-MM-DD (maybe unpadded)
+            y, m, d = parts
+        elif len(parts[2]) == 4:      # DD/MM/YYYY from Agmarknet
+            d, m, y = parts
+        else:
+            return v
+        return "%s-%s-%s" % (y.zfill(4), m.zfill(2), d.zfill(2))
+    return v
 
 
 def copy_simple(src, dst, table, cols):
@@ -274,22 +310,37 @@ def main():
             min_price, max_price, modal_price FROM price_data
             WHERE district IS NOT NULL
             GROUP BY crop_id, district, market_name, date, modal_price""").fetchall()
+    prices = [(c[0], c[1], c[2], to_iso_date(c[3]), c[4], c[5], c[6])
+              for c in prices]
+    prices = [(c[0], c[1], c[2], to_iso_date(c[3]), c[4], c[5], c[6])
+              for c in prices]
     dst.executemany("""INSERT OR IGNORE INTO price_data
             (crop_id, district, market_name, date, min_price, max_price, modal_price)
             VALUES (?,?,?,?,?,?,?)""", prices)
 
+    # Older databases predate the provenance columns, so derive them: a row
+    # built from its own weather is 'local', anything else came from the model.
     scores = src.execute("""SELECT s.region_id, s.crop_id, s.soil_score,
             s.rainfall_score, s.temp_score, s.water_score, s.growing_score,
             s.history_score, s.market_factor, s.land_multiplier, s.overall_score,
+            CASE WHEN s.rainfall_score IS NOT NULL AND s.temp_score IS NOT NULL
+                 THEN 'local' ELSE 'external' END,
+            ROUND(100.0 * ((s.soil_score IS NOT NULL) +
+                           (s.rainfall_score IS NOT NULL) +
+                           (s.temp_score IS NOT NULL) +
+                           (s.water_score IS NOT NULL) +
+                           (s.growing_score IS NOT NULL) +
+                           (s.history_score IS NOT NULL) +
+                           (s.market_factor IS NOT NULL)) / 7.0, 1),
             s.has_market_data, s.avg_market_price, s.price_trend_pct
             FROM crop_suitability_scores s
             GROUP BY s.region_id, s.crop_id""").fetchall()
     dst.executemany("""INSERT OR IGNORE INTO crop_suitability_scores
             (region_id, crop_id, soil_score, rainfall_score, temp_score,
              water_score, growing_score, history_score, market_factor,
-             land_multiplier, overall_score, has_market_data, avg_market_price,
-             price_trend_pct)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", scores)
+             land_multiplier, overall_score, score_source, confidence,
+             has_market_data, avg_market_price, price_trend_pct)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", scores)
 
     n_years, n_season = summarize_weather(src, dst)
 
