@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFarm } from '../context/useFarm';
+import { useAuth } from '../auth/useAuth';
 import {
   ChevronRight,
   User,
@@ -16,6 +17,7 @@ import {
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { logout, user } = useAuth();
   const {
     lang,
     t,
@@ -37,7 +39,10 @@ export default function Profile() {
 
   const handleReset = () => {
     if (window.confirm(lang === 'mr' ? 'सर्व डेटा रीसेट करायचा आहे का?' : 'Reset all settings and history?')) {
+      // Keep accounts: clearing settings must not delete the sign-in records.
+      const savedUsers = localStorage.getItem('pm_auth_users');
       localStorage.clear();
+      if (savedUsers) localStorage.setItem('pm_auth_users', savedUsers);
       window.location.reload();
     }
   };
@@ -163,14 +168,30 @@ export default function Profile() {
           <span className="helpline-text">{t('kisanCallCenter')}</span>
         </div>
 
-        {/* Log out / Reset button */}
+        {/* Signed-in account, sign out and reset */}
         <div className="logout-btn-container">
+          {user?.email && (
+            <p style={{ fontSize: '0.82rem', color: '#607D8B', marginBottom: '0.55rem', textAlign: 'center' }}>
+              {user.name} · {user.email}
+            </p>
+          )}
+          <button
+            type="button"
+            className="btn-outline-danger"
+            onClick={() => {
+              logout();
+              navigate('/login', { replace: true });
+            }}
+          >
+            <LogOut size={18} />
+            <span>{lang === 'mr' ? 'साइन आउट' : 'Sign out'}</span>
+          </button>
           <button
             type="button"
             className="btn-outline-danger"
             onClick={handleReset}
+            style={{ marginTop: '0.6rem' }}
           >
-            <LogOut size={18} />
             <span>{t('logOut')}</span>
           </button>
         </div>

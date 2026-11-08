@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { FarmProvider } from './context/FarmContext';
+import { AuthProvider } from './auth/AuthContext';
+import RequireAuth from './auth/RequireAuth';
 
 import Home from './pages/Home';
 import FindCropForm from './pages/FindCropForm';
@@ -11,46 +13,65 @@ import CropFacts from './pages/CropFacts';
 import Profile from './pages/Profile';
 import History from './pages/History';
 import Soil from './pages/Soil';
+import Login from './pages/Login';
 
 import BottomNav from './components/BottomNav';
 import LocationModal from './components/LocationModal';
 
 import './App.css';
 
+function AppShell() {
+  return (
+    <div className="app-viewport-wrapper">
+      <div className="app-mobile-frame">
+        {/* Scrollable screen content area */}
+        <div className="screen-scroll-container">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/find-crop" element={<FindCropForm />} />
+            <Route path="/recommendations" element={<Recommendations />} />
+            <Route path="/crop/:name" element={<CropDetails />} />
+            <Route path="/check-crop" element={<CheckCrop />} />
+            <Route path="/compare" element={<Compare />} />
+            <Route path="/crop-facts" element={<CropFacts />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/soil" element={<Soil />} />
+            <Route path="/soil-lab" element={<Soil />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+
+        {/* Permanent Bottom Navigation Bar across ALL screens */}
+        <BottomNav />
+
+        {/* Global Location Selector Modal */}
+        <LocationModal />
+      </div>
+    </div>
+  );
+}
+
 function App() {
   return (
-    <FarmProvider>
-      <BrowserRouter>
-        <div className="app-viewport-wrapper">
-          <div className="app-mobile-frame">
-            {/* Scrollable screen content area */}
-            <div className="screen-scroll-container">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/find-crop" element={<FindCropForm />} />
-                <Route path="/recommendations" element={<Recommendations />} />
-                <Route path="/crop/:name" element={<CropDetails />} />
-                <Route path="/check-crop" element={<CheckCrop />} />
-                <Route path="/compare" element={<Compare />} />
-                <Route path="/crop-facts" element={<CropFacts />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/history" element={<History />} />
-                <Route path="/soil" element={<Soil />} />
-                <Route path="/soil-lab" element={<Soil />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </div>
-
-            {/* Permanent Bottom Navigation Bar across ALL screens */}
-            <BottomNav />
-
-            {/* Global Location Selector Modal */}
-            <LocationModal />
-          </div>
-        </div>
-      </BrowserRouter>
-    </FarmProvider>
+    <AuthProvider>
+      <FarmProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="*"
+              element={
+                <RequireAuth>
+                  <AppShell />
+                </RequireAuth>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </FarmProvider>
+    </AuthProvider>
   );
 }
 
