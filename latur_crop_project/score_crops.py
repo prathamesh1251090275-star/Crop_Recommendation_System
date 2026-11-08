@@ -335,9 +335,7 @@ def main():
         growing_score REAL,
         history_score REAL,
         market_factor REAL,
-        land_multiplier REAL,
         overall_score REAL,
-        has_market_data INTEGER,
         avg_market_price REAL,
         price_trend_pct REAL
     )
@@ -345,7 +343,7 @@ def main():
     # Migration: add new factor columns if table existed without them.
     s_cols = [r[1] for r in cur.execute("PRAGMA table_info(crop_suitability_scores)").fetchall()]
     for col in ("water_score", "growing_score", "history_score",
-                "market_factor", "land_multiplier"):
+                "market_factor"):
         if col not in s_cols:
             cur.execute(f"ALTER TABLE crop_suitability_scores ADD COLUMN {col} REAL")
     cur.execute("DELETE FROM crop_suitability_scores")  # recompute fresh each run
@@ -517,10 +515,8 @@ def main():
                 # which only shifted scores without ranking anything.
                 market_score = None
 
-            # -------- L: land multiplier (currently neutral) ----------
-            land_mult = 1.0
 
-            # -------- Combine: F = [wR + wT + wSo + wW + wG + wH + wM] * L ---
+            # -------- Combine: weighted mean over the factors we have --------
             components = {
                 "R": rainfall_score, "T": temp_score, "So": soil_score,
                 "W": water_score, "G": growing_score, "H": history_score,
@@ -542,7 +538,7 @@ def main():
             # real weather (R and T). Without it, W+H+M alone would inflate
             # scores for tehsils that only carry district-level data.
             if denom > 0 and rainfall_score is not None and temp_score is not None:
-                local_overall = (num_numerator / denom) * land_mult
+                local_overall = num_numerator / denom
 
             # Find crop season for the print/detail string
             season_name = season_of_crop.get(crop_id, "?")
@@ -568,12 +564,12 @@ def main():
                 """INSERT INTO crop_suitability_scores
                    (region_id, crop_id, soil_score, rainfall_score, temp_score,
                     water_score, growing_score, history_score, market_factor,
-                    land_multiplier, overall_score, score_source, confidence,
-                    has_market_data, avg_market_price, price_trend_pct)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    overall_score, score_source, confidence,
+                    avg_market_price, price_trend_pct)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (region_id, crop_id, soil_score, rainfall_score, temp_score,
                  water_score, growing_score, history_score, market_score,
-                 land_mult, overall, score_source, confidence, int(has_market),
+                 overall, score_source, confidence,
                  avg_price, trend_pct),
             )
             if overall is not None:

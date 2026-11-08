@@ -146,11 +146,9 @@ CREATE TABLE crop_suitability_scores (
     growing_score REAL,
     history_score REAL,
     market_factor REAL,
-    land_multiplier REAL,
     overall_score REAL,  -- NULL = not enough data to score this crop here
     score_source TEXT,   -- 'local' = own weather, 'external' = regional model
     confidence REAL,     -- % of the 7 factors actually present
-    has_market_data INTEGER,
     avg_market_price REAL,
     price_trend_pct REAL,
     UNIQUE(region_id, crop_id)
@@ -322,7 +320,7 @@ def main():
     # built from its own weather is 'local', anything else came from the model.
     scores = src.execute("""SELECT s.region_id, s.crop_id, s.soil_score,
             s.rainfall_score, s.temp_score, s.water_score, s.growing_score,
-            s.history_score, s.market_factor, s.land_multiplier, s.overall_score,
+            s.history_score, s.market_factor, s.overall_score,
             CASE WHEN s.rainfall_score IS NOT NULL AND s.temp_score IS NOT NULL
                  THEN 'local' ELSE 'external' END,
             ROUND(100.0 * ((s.soil_score IS NOT NULL) +
@@ -332,15 +330,15 @@ def main():
                            (s.growing_score IS NOT NULL) +
                            (s.history_score IS NOT NULL) +
                            (s.market_factor IS NOT NULL)) / 7.0, 1),
-            s.has_market_data, s.avg_market_price, s.price_trend_pct
+            s.avg_market_price, s.price_trend_pct
             FROM crop_suitability_scores s
             GROUP BY s.region_id, s.crop_id""").fetchall()
     dst.executemany("""INSERT OR IGNORE INTO crop_suitability_scores
             (region_id, crop_id, soil_score, rainfall_score, temp_score,
              water_score, growing_score, history_score, market_factor,
-             land_multiplier, overall_score, score_source, confidence,
-             has_market_data, avg_market_price, price_trend_pct)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", scores)
+             overall_score, score_source, confidence,
+             avg_market_price, price_trend_pct)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", scores)
 
     n_years, n_season = summarize_weather(src, dst)
 
