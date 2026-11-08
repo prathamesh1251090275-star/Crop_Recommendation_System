@@ -438,7 +438,23 @@ def main():
                 season_rain_years, season_et0_years, dry_years = get_cached_season_stats(season_months)
                 if season_rain_years:
                     avg_season_rain = sum(season_rain_years) / len(season_rain_years)
-                    r_season = score_range(avg_season_rain, rain_min, rain_max)
+                    # The crop's rainfall band describes its whole growing
+                    # period, but season_rain_years covers only the months the
+                    # crop is in the field. Comparing a 5-month Rabi total with
+                    # an annual band made every Rabi crop look drought-stricken
+                    # (wheat and gram scored 0 for rain in Satara although they
+                    # are the district's Rabi staples). Scale the band to the
+                    # season window; perennials keep the full-year band.
+                    season_share = (
+                        len(season_months) / 12.0
+                        if crop_type and crop_type.strip().lower() == "seasonal"
+                        else 1.0
+                    )
+                    r_season = score_range(
+                        avg_season_rain,
+                        rain_min * season_share,
+                        rain_max * season_share,
+                    )
 
                     # Distribution: coefficient of variation of the seasonal totals
                     # across years (low variability = reliable rain).
@@ -467,7 +483,10 @@ def main():
                 avg_temp = (wv["tmax_avg"] + wv["tmin_avg"]) / 2
                 temp_score = score_range(avg_temp, temp_min, temp_max)
 
-            # -------- G: growing-water adequacy (P/PET) ----------
+            # -------- G: growing-water adequacy (rain + irrigation) ----------
+            crop_df = district_row.get(name, (None, None, None))
+            crop_irr = crop_df[0] if crop_df[0] is not None else agg_irr
+            need_pct = CROP_IRRIGATION_NEED_MIN.get(name, 25)
             growing_score = None
             if wv:
                 season_rain_years, season_et0_years, _ = get_cached_season_stats(season_months)
@@ -476,21 +495,39 @@ def main():
                     rain = sum(season_rain_years) / len(season_rain_years)
                     if pet > 0:
                         ppet = rain / pet
-                        ppet_min, _ = CROP_PPET_BAND.get(name, DEFAULT_PPET_BAND)
-                        if ppet >= ppet_min:
+                        # Rainfall is not the only water the crop receives.
+                        # Credit the share of its area the district actually
+                        # irrigates, scaled by how much of the crop's demand
+                        # must come from irrigation. Ignoring this made every
+                        # Rabi crop look drought-stricken where it is watered:
+                        # wheat in Satara has 51% of its area irrigated and
+                        # scored 8 here.
+                        irr_credit = (crop_irr or 0.0) * (need_pct / 100.0) * 1.2
+                        ppet_eff = ppet + irr_credit
+                        ppet_min, _ppet_max = CROP_PPET_BAND.get(name, DEFAULT_PPET_BAND)
+                        if ppet_eff >= ppet_min:
                             growing_score = 100.0
                         else:
                             # Below the crop's moisture minimum -> linear decay.
-                            growing_score = max(0.0, 100.0 * (ppet / ppet_min))
+                            growing_score = max(0.0, 100.0 * (ppet_eff / ppet_min))
 
             # -------- W: district irrigation (per crop where known) ----------
-            crop_df = district_row.get(name, (None, None, None))
-            crop_irr = crop_df[0] if crop_df[0] is not None else agg_irr
+            # crop_irr is the share of THIS crop's area the district irrigates:
+            # evidence that the local water system supports the crop, not a
+            # measure of how much of its demand is met. Comparing the two
+            # directly scored 0 exactly where irrigation is strongest (Satara
+            # waters 42% of its sugarcane against a 75% requirement -> 0), so a
+            # canal-fed taluka looked unsuitable for sugarcane. Score coverage
+            # of the requirement instead, and never penalise a rainfed-adapted
+            # crop for low irrigation.
             water_score = None
             if crop_irr is not None:
-                need_min = CROP_IRRIGATION_NEED_MIN.get(name, 25)
-                need_max = need_min + 60   # plenty of headroom past the need
-                water_score = score_range(crop_irr * 100, need_min, need_max)
+                irr_pct = crop_irr * 100.0
+                if need_pct <= 5:
+                    water_score = 85.0 + 15.0 * min(1.0, irr_pct / 30.0)
+                else:
+                    coverage = min(1.0, irr_pct / need_pct)
+                    water_score = 35.0 + 65.0 * coverage
 
             # -------- H: historical district crop-area share ----------
             share = crop_df[1] if crop_df[1] is not None else None

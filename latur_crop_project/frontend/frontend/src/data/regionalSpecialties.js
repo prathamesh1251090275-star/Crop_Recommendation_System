@@ -209,16 +209,22 @@ export const REGIONS = {
 
   Satara: {
     gi: ['strawberry'],
-    note_en: 'Mahabaleshwar and Wai grow the state’s strawberries; turmeric and sugarcane follow in the east.',
-    note_mr: 'महाबळेश्वर व वाई परिसरात स्ट्रॉबेरी; पूर्व भागात हळद व ऊस.',
-    district: { strawberry: 3, potato: 2, turmeric: 2 },
+    note_en: 'Mahabaleshwar and Wai grow the state’s strawberries and grapes; sugarcane, turmeric and fodder crops dominate the irrigated east.',
+    note_mr: 'महाबळेश्वर व वाई परिसरात स्ट्रॉबेरी व द्राक्ष; पूर्व भागात ऊस, हळद व चारा पिके.',
+    district: {
+      strawberry: 3, sugarcane: 2, grapes: 2, turmeric: 2,
+      potato: 2, pomegranate: 1, mango: 1,
+    },
     excluded: [],
     tehsils: {
-      Mahabaleshwar: { strawberry: 3 },
-      Wai: { strawberry: 2, turmeric: 2 },
-      Karad: { turmeric: 3, sugarcane: 2 },
+      Mahabaleshwar: { strawberry: 3, grapes: 2 },
+      Wai: { strawberry: 2, grapes: 2, turmeric: 2 },
+      Karad: { turmeric: 3, sugarcane: 3 },
       Koregaon: { sugarcane: 3 },
       Patan: { sugarcane: 2, turmeric: 2 },
+      Phaltan: { sugarcane: 3 },
+      Man: { pomegranate: 2 },
+      Khatav: { pomegranate: 1 },
     },
     tehsilExcluded: { Mahabaleshwar: ['cotton', 'rice', 'bajra', 'jowar'] },
   },
