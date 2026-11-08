@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "verify:scoring": "node scripts/verify-scoring.mjs",
+    "verify:scoring": "node scripts/verify-scoring.mjs && node scripts/verify-specialties.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -5,7 +5,15 @@ import { MapPin, Building2, ChevronRight, Sprout, Search, BookOpen, FlaskConical
 
 export default function Home() {
   const navigate = useNavigate();
-  const { lang, t, districtName, tehsilName, setLocationModalOpen, recommendationMode, soilLabData, regionalSpecialties, regionNote } = useFarm();
+  const { lang, t, districtName, tehsilName, setLocationModalOpen, recommendationMode, soilLabData, regionalSpecialties, regionNote, crops } = useFarm();
+
+  // A crop can be famous in this district and still fail the soil/water checks
+  // for this farm. Listing it under "famous crops" while every other screen
+  // calls it unsuitable is the contradiction users noticed, so the section only
+  // shows specialties the scoring engine currently accepts.
+  const famousHere = regionalSpecialties.filter((entry) =>
+    (crops || []).some((c) => c.id === entry.cropId && !c.notSuitable)
+  );
 
   const isLabActive = recommendationMode === 'soil_lab' && !!soilLabData;
 
@@ -61,7 +69,7 @@ export default function Home() {
 
 
         {/* Famous crops of this district / tehsil - curated regional data */}
-        {regionalSpecialties.length > 0 && (
+        {famousHere.length > 0 && (
           <section className="specialty-section">
             <div className="specialty-header">
               <Award size={18} color="#00695C" />
@@ -73,7 +81,7 @@ export default function Home() {
               <p className="specialty-note">{lang === 'mr' ? regionNote.note_mr : regionNote.note_en}</p>
             )}
             <div className="specialty-chips">
-              {regionalSpecialties.slice(0, 8).map((entry) => (
+              {famousHere.slice(0, 8).map((entry) => (
                 <button
                   key={`${entry.level}-${entry.cropId}`}
                   type="button"

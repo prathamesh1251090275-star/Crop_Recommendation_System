@@ -64,12 +64,18 @@ function statusText(value, kind = 'general') {
   return { mr: 'लक्ष द्या', en: 'Pay Attention' };
 }
 
-function reasonFor({ isSpecialty, specialty, soilType, soilDeltaRaw, waterSource, agronomy, acres, districtName }) {
+function reasonFor({ isSpecialty, specialtyCaution, specialty, soilType, soilDeltaRaw, waterSource, agronomy, acres, districtName }) {
   if (isSpecialty && specialty) {
     const where = specialty.level === 'tehsil' ? 'this tehsil' : `${districtName}`;
     return {
       mr: `${districtName} परिसरातील प्रसिद्ध पीक (${where === 'this tehsil' ? 'या तालुक्यात प्रमुख' : 'जिल्ह्यात प्रमुख'}).`,
       en: `A recognised regional specialty of ${where}.`,
+    };
+  }
+  if (specialtyCaution && specialty) {
+    return {
+      mr: `${districtName} परिसरात प्रसिद्ध, पण येथील माती व पाण्याची स्थिती त्यास पूर्ण समर्थन देत नाही.`,
+      en: `Famous in ${districtName}, but local soil and water conditions do not support it here.`,
     };
   }
   if (soilType === 'rocky' && soilDeltaRaw > 0) {
@@ -118,14 +124,12 @@ export function scoreCrop(crop, regional, ctx) {
 
   const regFactors = regional?.factors || {};
 
-  // ---- 2. Regional specialty: bounded, and never a rescue -----------------
+  // ---- 2. Regional specialty lookup ---------------------------------------
+  // The curated "famous here" marker is only *applied* further down, once the
+  // soil, water, season and lab checks are known. Awarding it here let a crop
+  // be labelled both "regional specialty" and "not suitable" at once.
   const specialty = getSpecialty(district, tehsil, crop.id);
   const excluded = isExcludedCrop(district, tehsil, crop.id);
-  const specialtyEligible = Boolean(specialty) && !excluded && base >= SPECIALTY_MIN_BASE;
-  const specialtyPoints = specialtyEligible ? (SPECIALTY_POINTS[specialty.strength] || 0) : 0;
-  const isSpecialty = specialtyPoints > 0;
-  // Famous here, but the data disagrees - the UI shows this instead of a boost.
-  const specialtyCaution = Boolean(specialty) && !isSpecialty && !excluded;
 
   // ---- 3. Soil type -------------------------------------------------------
   const soilDeltaRaw = agronomy.soil?.[soilType] ?? 0;
@@ -181,7 +185,25 @@ export function scoreCrop(crop, regional, ctx) {
   }
 
   // ---- 8. Combine, then clamp to a real 0-100 scale -----------------------
-  let raw = base + soilDelta + specialtyPoints + waterDelta + seasonDelta + landDelta;
+  // A specialty may only refine a crop that is actually viable here: it is
+  // withheld when a hard disqualifier applies (no water for a thirsty crop,
+  // rocky soil, lab conflict, excluded crop) and when the bumped score would
+  // still sit below the not-suitable line.
+  const specialtyBlocked =
+    excluded ||
+    waterConflict ||
+    (soilType === 'rocky' && soilDeltaRaw <= -40) ||
+    Boolean(soilLabMatch?.severeConflict);
+  const specialtyEligible = Boolean(specialty) && !specialtyBlocked && base >= SPECIALTY_MIN_BASE;
+  const specialtyPoints = specialtyEligible ? (SPECIALTY_POINTS[specialty.strength] || 0) : 0;
+  const withoutSpecialty = base + soilDelta + waterDelta + seasonDelta + landDelta;
+  const isSpecialty =
+    specialtyPoints > 0 && (withoutSpecialty + specialtyPoints) >= NOT_SUITABLE_BELOW;
+  // Famous here, but the conditions disagree: the UI says so instead of
+  // awarding a bump.
+  const specialtyCaution = Boolean(specialty) && !isSpecialty && !excluded;
+
+  let raw = isSpecialty ? withoutSpecialty + specialtyPoints : withoutSpecialty;
   // Lab evidence moves the score a fraction of the remaining headroom instead
   // of adding a flat bonus on top of an already-clipped number. Adding, then
   // clamping at 100, is what made four different crops all read "100%".
@@ -201,7 +223,7 @@ export function scoreCrop(crop, regional, ctx) {
 
   // ---- 9. Badge -----------------------------------------------------------
   let badge = BADGE.limited;
-  if (isSpecialty && score >= NOT_SUITABLE_BELOW) badge = BADGE.gi;
+  if (isSpecialty && !notSuitable) badge = BADGE.gi;
   else if (score >= 90) badge = BADGE.best;
   else if (score >= 80) badge = BADGE.good;
   else if (score >= 70) badge = BADGE.consider;
@@ -257,7 +279,7 @@ export function scoreCrop(crop, regional, ctx) {
   });
 
   const reason = reasonFor({
-    isSpecialty, specialty, soilType, soilDeltaRaw, waterSource,
+    isSpecialty, specialtyCaution, specialty, soilType, soilDeltaRaw, waterSource,
     agronomy, acres, districtName,
   });
 

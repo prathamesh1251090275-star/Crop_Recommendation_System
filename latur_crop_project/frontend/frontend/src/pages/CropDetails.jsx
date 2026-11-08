@@ -112,7 +112,7 @@ export default function CropDetails() {
             <CheckCircle2 size={20} color={crop.regionalSpecialty.applied ? '#00695C' : '#E65100'} />
             <p className="guidance-text" style={{ color: '#004D40' }}>
               <strong>{cropName}</strong>{' '}
-              {crop.regionalSpecialty.caution
+              {(crop.regionalSpecialty.caution || crop.notSuitable)
                 ? (lang === 'mr'
                   ? `हे ${districtName} परिसरात प्रसिद्ध आहे, पण या तालुक्यातील जमीन व हवामानाची आकडेवारी त्यास पूर्ण समर्थन देत नाही. स्थानिक कृषी अधिकाऱ्यांशी खात्री करा.`
                   : `is famous in ${districtName}, but this tehsil's soil and climate data does not fully support it. Confirm with your local agriculture officer.`)
