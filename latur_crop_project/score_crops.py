@@ -2,7 +2,7 @@
 Applies the stored soil + weather data against each crop's ideal ranges to
 produce a suitability score, using the approved seven-factor formula:
 
-    F = [0.25*R + 0.20*T + 0.25*So + 0.10*W + 0.10*G + 0.05*H + 0.05*M] * L
+    F = 0.25*R + 0.20*T + 0.25*So + 0.10*W + 0.10*G + 0.05*H + 0.05*M
 
   R  = rainfall      = 0.60*season_fit + 0.25*distribution + 0.15*dry_spell
   T  = temperature   (growing-season fit)
